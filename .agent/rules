@@ -1,0 +1,18 @@
+# Regras do Agente para Simulações de Planetário / IOAA em VR
+
+1. **Objetivo Principal**:
+   - Transformar questões e problemas teóricos/práticos de olimpíadas de astronomia (ex: IOAA, OBA, IAO) em simulações tridimensionais fidedignas aos princípios físicos e astronômicos.
+   - Gerar vídeos prontos para visualização em óculos de Realidade Virtual (VR 360° Equirectangular).
+
+2. **Padrões de Simulação e Renderização**:
+   - **Formato de Câmera VR**: Câmera Panorâmica Equiretangular 360° (`bpy.data.cameras[...].type = 'PANO'`, `cycles.panorama_type = 'EQUIRECTANGULAR'`).
+   - **Resolução Padrão**: 3840x1920 (4K 2:1) para compatibilidade ideal com Meta Quest / VR Headsets. Resolução de preview rápido para testes: 1920x960.
+   - **Taxa de Quadros (FPS)**: 60 fps para fluidez em VR (mínimo 30 fps para testes).
+   - **Duração Típica**: 10 a 30 segundos (600 a 1800 frames) cobrindo o fenômeno astronômico de interesse.
+
+3. **Validação Científica**:
+   - Sempre resolver analiticamente ou computacionalmente as equações de movimento (Leis de Kepler, mecânica orbital, matrizes de rotação equatorial/horizontal, curvas de luz).
+   - Exibir referências visuais na simulação quando relevante (e.g., eixos celestes, linhas de órbita, meridianos, planos orbitais).
+
+4. **Pós-processamento Obrigatório**:
+   - Todo vídeo gerado deve passar pelo script de injeção de metadados esféricos (Spatial Media 360) antes de ser considerado pronto para o usuário.

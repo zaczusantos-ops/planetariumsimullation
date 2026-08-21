@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstroVR Hub - Planetário & Simulações IOAA</title>
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: rgba(17, 24, 39, 0.85);
+      --card-border: rgba(0, 240, 255, 0.2);
+      --accent: #00f0ff;
+      --accent-glow: rgba(0, 240, 255, 0.4);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at top center, #0d1b2a 0%, #030712 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 30px 20px 60px;
+    }
+    header {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto 40px;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px var(--accent-glow);
+    }
+    .card-tag {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .card h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    .card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .btn-launch {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #00d2ff, #0066ff);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0, 150, 255, 0.3);
+    }
+    .btn-launch:hover {
+      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+      transform: scale(1.02);
+    }
+    .btn-disabled {
+      background: rgba(255, 255, 255, 0.1);
+      color: #777;
+      pointer-events: none;
+      box-shadow: none;
+    }
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      color: #6b7280;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="badge">IOAA & OBA PLANETARIUM VR</div>
+    <h1>🪐 Simulador Astronômico em Realidade Virtual</h1>
+    <p class="subtitle">
+      Selecione um dos problemas de olimpíadas de astronomia abaixo para abrir no player VR 360° compatível com Google Cardboard e óculos VR.
+    </p>
+  </header>
+
+  <main class="grid">
+    <!-- Card 1: Quando o segundo Sol chegar -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema 1 • Sistema Binário</div>
+        <h2>Quando o segundo Sol chegar...</h2>
+        <p>Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.</p>
+      </div>
+      <a href="player.html?sim=quando_o_segundo_sol_chegar" class="btn-launch">
+        👓 ABRIR NO CARDBOARD VR
+      </a>
+    </div>
+
+    <!-- Card 2: Tatooine -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema 2 • Órbita Polar</div>
+        <h2>Tatooine em Órbita Perpendicular</h2>
+        <p>Exoplaneta que orbita um sistema binário em um plano perpendicular (inclinação de 90° em relação ao binário).</p>
+      </div>
+      <a href="player.html?sim=tatooine" class="btn-launch">
+        👓 ABRIR NO CARDBOARD VR
+      </a>
+    </div>
+
+    <!-- Card 3: Troianos -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema 3 • Pontos de Lagrange</div>
+        <h2>Asteroide Troiano (L4 / L5)</h2>
+        <p>Observador situado no enxame de asteroides troianos na órbita de Júpiter a 5,20 UA do Sol.</p>
+      </div>
+      <a href="#" class="btn-launch btn-disabled">
+        ⏳ EM PROCESSAMENTO
+      </a>
+    </div>
+
+    <!-- Card 4: Moonwalk -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema 5 • Lua e Rotação Síncrona</div>
+        <h2>Moonwalk (Observador na Lua)</h2>
+        <p>Visão do céu lunar com a Terra suspensa no céu selenográfico e a rotação síncrona lunar.</p>
+      </div>
+      <a href="#" class="btn-launch btn-disabled">
+        ⏳ EM PROCESSAMENTO
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    Desenvolvido com Antigravity • Renderização Blender 360° Equirectangular & Three.js WebXR
+  </footer>
+</body>
+</html>
