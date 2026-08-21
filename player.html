@@ -3,17 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Player Cardboard VR 360° - Calibrável</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Player Cardboard VR 360° - Lentes Circulares</title>
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      padding: 0;
       overflow: hidden;
       background-color: #000;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       user-select: none;
       -webkit-user-select: none;
+      width: 100vw;
+      height: 100vh;
     }
     #container {
       position: absolute;
@@ -83,8 +86,8 @@
       border-radius: 20px;
       text-decoration: none;
     }
-    /* Máscara de Lentes Circulares com Posição Dinâmica */
-    #lens-mask {
+    /* Máscara SVG Cardboard com 2 Círculos Transparentes */
+    #svg-mask-container {
       position: absolute;
       top: 0;
       left: 0;
@@ -94,48 +97,50 @@
       z-index: 10;
       display: none;
     }
+    /* Divisor central */
     #divider-line {
       position: absolute;
       left: 50%;
       top: 0;
-      width: 2px;
+      width: 4px;
       height: 100%;
-      background: rgba(255, 255, 255, 0.25);
+      background: #000;
       z-index: 12;
       pointer-events: none;
       display: none;
     }
-    /* Painel de Calibração Flutuante */
+    /* Painel de Calibração */
     #calib-panel {
       position: absolute;
-      bottom: 15px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       display: none;
       z-index: 100;
-      background: rgba(0, 0, 0, 0.85);
-      border: 1px solid rgba(0, 240, 255, 0.4);
-      border-radius: 24px;
-      padding: 8px 18px;
+      background: rgba(10, 15, 25, 0.9);
+      border: 1px solid #00f0ff;
+      border-radius: 30px;
+      padding: 8px 20px;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
       color: #00f0ff;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: bold;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
     }
     .adj-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
     .adj-btn {
       background: rgba(0, 240, 255, 0.2);
       border: 1px solid #00f0ff;
       color: white;
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
       display: flex;
       align-items: center;
@@ -148,32 +153,47 @@
 </head>
 <body>
   <div id="container"></div>
-  <div id="lens-mask"></div>
+
+  <!-- Máscara SVG Cardboard Oficial (Duas Lentes Circulares com borda preta) -->
+  <svg id="svg-mask-container" viewBox="0 0 1000 500" preserveAspectRatio="none">
+    <defs>
+      <mask id="lens-cutout">
+        <!-- Fundo branco que será preenchido de preto -->
+        <rect width="1000" height="500" fill="white" />
+        <!-- Dois círculos pretos que vazam a imagem 3D -->
+        <circle id="circle-left" cx="250" cy="250" r="220" fill="black" />
+        <circle id="circle-right" cx="750" cy="250" r="220" fill="black" />
+      </mask>
+    </defs>
+    <!-- Retângulo preto com o recorte das duas lentes -->
+    <rect width="1000" height="500" fill="#000000" mask="url(#lens-cutout)" />
+  </svg>
+
   <div id="divider-line"></div>
 
-  <!-- Controles de Ajuste da Lente e Posição -->
+  <!-- Painel de Calibração das Lentes -->
   <div id="calib-panel">
     <div class="adj-group">
       <span>Distância:</span>
-      <button id="btn-dist-minus" class="adj-btn">◀▶</button>
-      <button id="btn-dist-plus" class="adj-btn">▶◀</button>
+      <button id="btn-dist-in" class="adj-btn">▶◀</button>
+      <button id="btn-dist-out" class="adj-btn">◀▶</button>
     </div>
     <div class="adj-group">
       <span>Tamanho:</span>
-      <button id="btn-size-minus" class="adj-btn">-</button>
-      <button id="btn-size-plus" class="adj-btn">+</button>
+      <button id="btn-size-dec" class="adj-btn">-</button>
+      <button id="btn-size-inc" class="adj-btn">+</button>
     </div>
   </div>
 
   <div id="ui-overlay">
-    <div class="badge">🥽 LENTES CARDBOARD CALIBRÁVEIS</div>
+    <div class="badge">🥽 MODELO OFICIAL CARDBOARD VR</div>
     <h1 id="sim-title">Quando o segundo Sol chegar...</h1>
     <p>
-      Imagens <strong>100% idênticas no infinito</strong> com duas lentes circulares Cardboard. Você pode regular a distância e o tamanho das lentes a qualquer momento nos botões inferiores.
+      Formatado com o <strong>recorte circular oficial das lentes Cardboard</strong> e imagens <strong>100% idênticas no infinito astronômico</strong>.
     </p>
-    <button id="start-btn" class="btn">👓 ENTRAR NO CARDBOARD</button>
+    <button id="start-btn" class="btn">👓 INICIAR NO CARDBOARD</button>
     <br>
-    <a href="index.html" class="btn-back">⬅ Voltar ao Hub de Simulações</a>
+    <a href="index.html" class="btn-back">⬅ Voltar ao Hub</a>
   </div>
 
   <video id="video-source" loop crossOrigin="anonymous" playsinline webkit-playsinline style="display:none;">
@@ -187,55 +207,59 @@
     let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
     let screenOrientation = 0;
 
-    // Parâmetros de Calibração das Lentes
-    let lensSpacingPercent = 25; // 25% (Centro esquerdo) e 75% (Centro direito)
-    let lensRadiusPercent = 58;  // Tamanho do círculo da lente
+    // Coordenadas SVG das lentes (0 a 1000 de largura)
+    let leftCX = 250;
+    let rightCX = 750;
+    let lensRadius = 220;
 
     const startBtn = document.getElementById('start-btn');
     const uiOverlay = document.getElementById('ui-overlay');
-    const lensMask = document.getElementById('lens-mask');
+    const svgMask = document.getElementById('svg-mask-container');
     const dividerLine = document.getElementById('divider-line');
     const calibPanel = document.getElementById('calib-panel');
-    const btnDistMinus = document.getElementById('btn-dist-minus');
-    const btnDistPlus = document.getElementById('btn-dist-plus');
-    const btnSizeMinus = document.getElementById('btn-size-minus');
-    const btnSizePlus = document.getElementById('btn-size-plus');
+    const circleLeft = document.getElementById('circle-left');
+    const circleRight = document.getElementById('circle-right');
+    const btnDistIn = document.getElementById('btn-dist-in');
+    const btnDistOut = document.getElementById('btn-dist-out');
+    const btnSizeDec = document.getElementById('btn-size-dec');
+    const btnSizeInc = document.getElementById('btn-size-inc');
     video = document.getElementById('video-source');
 
-    function updateLensMask() {
-      const leftPos = lensSpacingPercent;
-      const rightPos = 100 - lensSpacingPercent;
-      const r = lensRadiusPercent;
-      const rFade = r + 4;
-
-      lensMask.style.background = `
-        radial-gradient(circle at ${leftPos}% 50%, transparent 0%, transparent ${r}%, #000 ${rFade}%),
-        radial-gradient(circle at ${rightPos}% 50%, transparent 0%, transparent ${r}%, #000 ${rFade}%)
-      `;
+    function updateSvgCircles() {
+      circleLeft.setAttribute('cx', leftCX);
+      circleRight.setAttribute('cx', rightCX);
+      circleLeft.setAttribute('r', lensRadius);
+      circleRight.setAttribute('r', lensRadius);
     }
 
-    btnDistMinus.addEventListener('click', (e) => {
+    // Aproximar lentes em direção ao centro
+    btnDistIn.addEventListener('click', (e) => {
       e.stopPropagation();
-      lensSpacingPercent = Math.max(15, lensSpacingPercent - 1);
-      updateLensMask();
+      leftCX = Math.min(380, leftCX + 10);
+      rightCX = Math.max(620, rightCX - 10);
+      updateSvgCircles();
     });
 
-    btnDistPlus.addEventListener('click', (e) => {
+    // Afastar lentes para fora
+    btnDistOut.addEventListener('click', (e) => {
       e.stopPropagation();
-      lensSpacingPercent = Math.min(35, lensSpacingPercent + 1);
-      updateLensMask();
+      leftCX = Math.max(150, leftCX - 10);
+      rightCX = Math.min(850, rightCX + 10);
+      updateSvgCircles();
     });
 
-    btnSizeMinus.addEventListener('click', (e) => {
+    // Diminuir tamanho do círculo
+    btnSizeDec.addEventListener('click', (e) => {
       e.stopPropagation();
-      lensRadiusPercent = Math.max(35, lensRadiusPercent - 2);
-      updateLensMask();
+      lensRadius = Math.max(140, lensRadius - 10);
+      updateSvgCircles();
     });
 
-    btnSizePlus.addEventListener('click', (e) => {
+    // Aumentar tamanho do círculo
+    btnSizeInc.addEventListener('click', (e) => {
       e.stopPropagation();
-      lensRadiusPercent = Math.min(75, lensRadiusPercent + 2);
-      updateLensMask();
+      lensRadius = Math.min(245, lensRadius + 10);
+      updateSvgCircles();
     });
 
     function init() {
@@ -258,7 +282,6 @@
       texture.magFilter = THREE.LinearFilter;
       texture.format = THREE.RGBFormat;
 
-      // Esfera astronômica 360
       const geometry = new THREE.SphereGeometry(500, 64, 48);
       geometry.scale(-1, 1, 1);
       const material = new THREE.MeshBasicMaterial({ map: texture });
@@ -269,7 +292,6 @@
       window.addEventListener('resize', onWindowResize);
       window.addEventListener('orientationchange', () => { screenOrientation = window.orientation || 0; });
       screenOrientation = window.orientation || 0;
-      updateLensMask();
     }
 
     function requestMotionPermission() {
@@ -396,7 +418,7 @@
     startBtn.addEventListener('click', () => {
       isVR = true;
       uiOverlay.style.display = 'none';
-      lensMask.style.display = 'block';
+      svgMask.style.display = 'block';
       dividerLine.style.display = 'block';
       calibPanel.style.display = 'flex';
 
