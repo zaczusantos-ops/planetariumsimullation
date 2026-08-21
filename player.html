@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Player Cardboard VR 360°</title>
+  <title>Player Cardboard VR 360° - Imagens Idênticas</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -50,6 +50,16 @@
       color: #c0d0e0;
       margin-bottom: 20px;
     }
+    .badge {
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid #00f0ff;
+      color: #00f0ff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
     .btn {
       background: linear-gradient(135deg, #00d2ff, #0066ff);
       color: white;
@@ -61,8 +71,9 @@
       cursor: pointer;
       box-shadow: 0 6px 20px rgba(0, 150, 255, 0.5);
       transition: all 0.2s ease;
-      margin-bottom: 12px;
+      margin-bottom: 15px;
     }
+    .btn:active { transform: scale(0.96); }
     .btn-back {
       background: transparent;
       border: 1px solid #4b5563;
@@ -78,40 +89,10 @@
       top: 0;
       width: 2px;
       height: 100%;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.25);
       z-index: 10;
       pointer-events: none;
       display: none;
-    }
-    #vr-controls {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      z-index: 100;
-      background: rgba(0, 0, 0, 0.75);
-      border: 1px solid rgba(0, 240, 255, 0.4);
-      border-radius: 30px;
-      padding: 6px 16px;
-      align-items: center;
-      gap: 12px;
-      color: #00f0ff;
-      font-size: 13px;
-      font-weight: bold;
-    }
-    .adj-btn {
-      background: rgba(0, 240, 255, 0.2);
-      border: 1px solid #00f0ff;
-      color: white;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -120,18 +101,13 @@
   <div id="container"></div>
   <div id="divider-line"></div>
 
-  <div id="vr-controls">
-    <button id="btn-narrow" class="adj-btn">◀▶</button>
-    <span>Distância Lentes: <span id="offset-disp">25</span>px</span>
-    <button id="btn-widen" class="adj-btn">▶◀</button>
-  </div>
-
   <div id="ui-overlay">
-    <h1 id="sim-title">🪐 Simulação Planetário VR</h1>
+    <div class="badge">🪐 MODO ASTRONÔMICO INFINITO (0% PARALAXE)</div>
+    <h1 id="sim-title">Quando o segundo Sol chegar...</h1>
     <p>
-      Coloque o celular no <strong>Google Cardboard</strong> e use os botões <code>[◀▶]</code> para ajustar o foco das lentes.
+      As duas imagens (olho esquerdo e direito) são <strong>100% idênticas</strong>, respeitando a física astronômica de objetos a milhões de quilômetros no infinito óptico.
     </p>
-    <button id="start-btn" class="btn">👓 INICIAR CARDBOARD</button>
+    <button id="start-btn" class="btn">👓 INICIAR NO CARDBOARD</button>
     <br>
     <a href="index.html" class="btn-back">⬅ Voltar ao Hub de Simulações</a>
   </div>
@@ -146,28 +122,11 @@
     let hasOrientation = false;
     let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
     let screenOrientation = 0;
-    let opticalCenterOffset = 25; 
 
     const startBtn = document.getElementById('start-btn');
     const uiOverlay = document.getElementById('ui-overlay');
     const dividerLine = document.getElementById('divider-line');
-    const vrControls = document.getElementById('vr-controls');
-    const offsetDisp = document.getElementById('offset-disp');
-    const btnNarrow = document.getElementById('btn-narrow');
-    const btnWiden = document.getElementById('btn-widen');
     video = document.getElementById('video-source');
-
-    btnNarrow.addEventListener('click', (e) => {
-      e.stopPropagation();
-      opticalCenterOffset -= 5;
-      offsetDisp.textContent = opticalCenterOffset;
-    });
-
-    btnWiden.addEventListener('click', (e) => {
-      e.stopPropagation();
-      opticalCenterOffset += 5;
-      offsetDisp.textContent = opticalCenterOffset;
-    });
 
     function init() {
       const container = document.getElementById('container');
@@ -189,6 +148,7 @@
       texture.magFilter = THREE.LinearFilter;
       texture.format = THREE.RGBFormat;
 
+      // Esfera 360° com mapeamento equirretangular completo
       const geometry = new THREE.SphereGeometry(500, 64, 48);
       geometry.scale(-1, 1, 1);
       const material = new THREE.MeshBasicMaterial({ map: texture });
@@ -258,7 +218,7 @@
     function setupTouchControls() {
       let isDragging = false;
       window.addEventListener('mousedown', e => { 
-        if (e.target.tagName === 'BUTTON') return;
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
         isDragging = true; touchStartX = e.clientX; touchStartY = e.clientY; 
       });
       window.addEventListener('mousemove', e => {
@@ -271,13 +231,13 @@
       window.addEventListener('mouseup', () => isDragging = false);
 
       window.addEventListener('touchstart', e => {
-        if (e.target.tagName === 'BUTTON') return;
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
         if (e.touches.length === 1) {
           touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
         }
       });
       window.addEventListener('touchmove', e => {
-        if (e.target.tagName === 'BUTTON') return;
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
         if (e.touches.length === 1 && !hasOrientation) {
           lon -= (e.touches[0].clientX - touchStartX) * 0.25;
           lat += (e.touches[0].clientY - touchStartY) * 0.25;
@@ -301,15 +261,18 @@
         const height = window.innerHeight;
         const halfWidth = width / 2;
 
+        // Ambas as metades da tela recebem exatamente a mesma perspectiva de câmera (infinito astronômico puro)
         camera.aspect = halfWidth / height;
         camera.updateProjectionMatrix();
 
-        renderer.setViewport(0 - opticalCenterOffset, 0, halfWidth, height);
+        // 1. Olho Esquerdo (Metade Esquerda [0, halfWidth])
+        renderer.setViewport(0, 0, halfWidth, height);
         renderer.setScissor(0, 0, halfWidth, height);
         renderer.setScissorTest(true);
         renderer.render(scene, camera);
 
-        renderer.setViewport(halfWidth + opticalCenterOffset, 0, halfWidth, height);
+        // 2. Olho Direito (Metade Direita [halfWidth, width] - 100% IDÊNTICO)
+        renderer.setViewport(halfWidth, 0, halfWidth, height);
         renderer.setScissor(halfWidth, 0, halfWidth, height);
         renderer.setScissorTest(true);
         renderer.render(scene, camera);
@@ -324,7 +287,6 @@
       isVR = true;
       uiOverlay.style.display = 'none';
       dividerLine.style.display = 'block';
-      vrControls.style.display = 'flex';
 
       video.play().catch(e => console.log("Play error:", e));
       requestMotionPermission();
