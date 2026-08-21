@@ -6,12 +6,12 @@ import os
 from dulwich import porcelain, client
 from dulwich.repo import Repo
 
-KEY_PATH = os.path.abspath("deploy_key").replace("\\", "/")
+KEY_PATH = os.path.abspath("deploy_key")
 REPO_SSH = "git@github.com:zaczusantos-ops/planetariumsimullation.git"
 
 class WindowsOpenSSHVendor(client.SubprocessSSHVendor):
     def run_command(self, host, command, **kwargs):
-        kwargs['ssh_command'] = f'ssh -i "{KEY_PATH}" -o StrictHostKeyChecking=no'
+        kwargs['ssh_command'] = f'ssh -i {KEY_PATH} -o StrictHostKeyChecking=no'
         return super().run_command(host, command, **kwargs)
 
 def do_push():
