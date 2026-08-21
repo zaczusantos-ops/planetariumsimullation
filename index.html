@@ -28,7 +28,7 @@
     header {
       text-align: center;
       max-width: 800px;
-      margin: 0 auto 40px;
+      margin: 0 auto 35px;
     }
     .badge {
       display: inline-block;
@@ -43,19 +43,148 @@
       margin-bottom: 12px;
     }
     h1 {
-      font-size: 32px;
+      font-size: 30px;
       font-weight: 800;
       color: #fff;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       background: linear-gradient(135deg, #ffffff 40%, var(--accent) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     p.subtitle {
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text-muted);
-      line-height: 1.6;
+      line-height: 1.5;
     }
+
+    /* Seção de Calibração das Lentes */
+    .calib-section {
+      max-width: 900px;
+      margin: 0 auto 40px;
+      background: rgba(13, 27, 42, 0.7);
+      border: 1px solid var(--accent);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 8px 30px rgba(0, 240, 255, 0.15);
+    }
+    .calib-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .calib-header h2 {
+      font-size: 18px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .calib-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .control-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .control-box label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+    .control-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .btn-calib {
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid var(--accent);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      flex: 1;
+      text-align: center;
+    }
+    .btn-calib:active {
+      background: var(--accent);
+      color: #000;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Testador de Visão no Hub */
+    .test-viewer {
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 12px;
+      height: 140px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+    .test-half {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .test-divider {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: #444;
+      transform: translateX(-50%);
+    }
+    .test-lens-cutout {
+      width: 100px;
+      height: 100px;
+      border-radius: 20px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.1s ease;
+    }
+    .test-target {
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent);
+    }
+    .test-line {
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      background: #00e5ff;
+      box-shadow: 0 0 8px #00e5ff;
+    }
+
+    /* Grade de Simulações */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -73,8 +202,6 @@
       justify-content: space-between;
       backdrop-filter: blur(12px);
       transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
     }
     .card:hover {
       transform: translateY(-5px);
@@ -134,13 +261,68 @@
 </head>
 <body>
   <header>
-    <div class="badge">IOAA & OBA PLANETARIUM VR v2.1</div>
+    <div class="badge">IOAA PLANETARIUM VR</div>
     <h1>🪐 Simulador Astronômico em Realidade Virtual</h1>
     <p class="subtitle">
-      Selecione um problema abaixo para abrir no player com lentes circulares Cardboard calibráveis.
+      Calibre o seu óculos Cardboard abaixo e selecione uma simulação para assistir em 360° com a tela 100% desobstruída.
     </p>
   </header>
 
+  <!-- 🛠️ Calibrador de Lentes Cardboard (Fora da Simulação) -->
+  <section class="calib-section">
+    <div class="calib-header">
+      <h2>🛠️ Calibrador de Lentes do seu Cardboard</h2>
+      <span style="font-size: 12px; color: #9ca3af;">Configurações salvas automaticamente ✅</span>
+    </div>
+
+    <div class="calib-controls">
+      <!-- 1. Separação / Convergência (Unir / Separar Linhas) -->
+      <div class="control-box">
+        <label>
+          <span>Convergência das Lentes:</span>
+          <span id="shift-label">50 px</span>
+        </label>
+        <input type="range" id="shift-slider" min="0" max="100" value="50" step="2">
+        <div class="control-buttons">
+          <button id="btn-shift-in" class="btn-calib">◀ Unir Linhas</button>
+          <button id="btn-shift-out" class="btn-calib">Separar Linhas ▶</button>
+        </div>
+      </div>
+
+      <!-- 2. Tamanho da Abertura da Lente -->
+      <div class="control-box">
+        <label>
+          <span>Tamanho da Abertura:</span>
+          <span id="size-label">86 %</span>
+        </label>
+        <input type="range" id="size-slider" min="60" max="96" value="86" step="2">
+        <div class="control-buttons">
+          <button id="btn-size-dec" class="btn-calib">Diminuir Lente -</button>
+          <button id="btn-size-inc" class="btn-calib">Aumentar Lente +</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Testador Visual das Lentes no Hub -->
+    <div style="font-size: 13px; color: #9ca3af; margin-bottom: 8px;">Pré-visualização do Alinhamento Óptico:</div>
+    <div class="test-viewer">
+      <div class="test-divider"></div>
+      <div class="test-half">
+        <div id="test-lens-l" class="test-lens-cutout">
+          <div class="test-line"></div>
+          <div class="test-target"></div>
+        </div>
+      </div>
+      <div class="test-half">
+        <div id="test-lens-r" class="test-lens-cutout">
+          <div class="test-line"></div>
+          <div class="test-target"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lista de Simulações -->
   <main class="grid">
     <!-- Card 1: Quando o segundo Sol chegar -->
     <div class="card">
@@ -149,8 +331,8 @@
         <h2>Quando o segundo Sol chegar...</h2>
         <p>Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.</p>
       </div>
-      <a href="player.html?v=20260821_1508" class="btn-launch">
-        👓 ABRIR NO CARDBOARD VR
+      <a href="player.html?v=calibrado" class="btn-launch">
+        👓 INICIAR SIMULAÇÃO VR
       </a>
     </div>
 
@@ -161,8 +343,8 @@
         <h2>Tatooine em Órbita Perpendicular</h2>
         <p>Exoplaneta que orbita um sistema binário em um plano perpendicular (inclinação de 90° em relação ao binário).</p>
       </div>
-      <a href="player.html?sim=tatooine&v=20260821_1508" class="btn-launch">
-        👓 ABRIR NO CARDBOARD VR
+      <a href="player.html?sim=tatooine&v=calibrado" class="btn-launch">
+        👓 INICIAR SIMULAÇÃO VR
       </a>
     </div>
 
@@ -194,5 +376,71 @@
   <footer>
     Desenvolvido com Antigravity • Renderização Blender 360° Equirectangular & Three.js WebXR
   </footer>
+
+  <script>
+    // Recuperar valores salvos do localStorage
+    let shiftVal = parseInt(localStorage.getItem('cardboard_shift') || '50');
+    let sizeVal = parseInt(localStorage.getItem('cardboard_size') || '86');
+
+    const shiftSlider = document.getElementById('shift-slider');
+    const shiftLabel = document.getElementById('shift-label');
+    const sizeSlider = document.getElementById('size-slider');
+    const sizeLabel = document.getElementById('size-label');
+
+    const btnShiftIn = document.getElementById('btn-shift-in');
+    const btnShiftOut = document.getElementById('btn-shift-out');
+    const btnSizeDec = document.getElementById('btn-size-dec');
+    const btnSizeInc = document.getElementById('btn-size-inc');
+
+    const testLensL = document.getElementById('test-lens-l');
+    const testLensR = document.getElementById('test-lens-r');
+
+    function updateCalibration() {
+      shiftLabel.textContent = shiftVal + ' px';
+      shiftSlider.value = shiftVal;
+      sizeLabel.textContent = sizeVal + ' %';
+      sizeSlider.value = sizeVal;
+
+      localStorage.setItem('cardboard_shift', shiftVal);
+      localStorage.setItem('cardboard_size', sizeVal);
+
+      // Atualizar preview visual de teste
+      const pxOffset = (shiftVal / 100) * 20; // Escala para o preview pequeno
+      testLensL.style.transform = `translateX(${pxOffset}px) scale(${sizeVal / 86})`;
+      testLensR.style.transform = `translateX(-${pxOffset}px) scale(${sizeVal / 86})`;
+    }
+
+    shiftSlider.addEventListener('input', (e) => {
+      shiftVal = parseInt(e.target.value);
+      updateCalibration();
+    });
+
+    sizeSlider.addEventListener('input', (e) => {
+      sizeVal = parseInt(e.target.value);
+      updateCalibration();
+    });
+
+    btnShiftIn.addEventListener('click', () => {
+      shiftVal = Math.min(100, shiftVal + 4);
+      updateCalibration();
+    });
+
+    btnShiftOut.addEventListener('click', () => {
+      shiftVal = Math.max(0, shiftVal - 4);
+      updateCalibration();
+    });
+
+    btnSizeDec.addEventListener('click', () => {
+      sizeVal = Math.max(60, sizeVal - 4);
+      updateCalibration();
+    });
+
+    btnSizeInc.addEventListener('click', () => {
+      sizeVal = Math.min(96, sizeVal + 4);
+      updateCalibration();
+    });
+
+    updateCalibration();
+  </script>
 </body>
 </html>

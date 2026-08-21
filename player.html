@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Player Cardboard VR 360° - Fusão Óptica Perfeita</title>
+  <title>Simulação VR 360° - Planetário IOAA</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -87,7 +87,7 @@
       text-decoration: none;
     }
     
-    /* Molduras das Lentes Cardboard */
+    /* Moldura das Lentes Cardboard (Sem nenhum botão em cima) */
     .eye-frame {
       position: absolute;
       top: 0;
@@ -104,18 +104,16 @@
     #right-eye-frame { left: 50vw; }
 
     .lens-cutout {
-      width: min(44vw, 86vh);
-      height: min(44vw, 86vh);
       border-radius: 50px;
       box-shadow: 0 0 0 9999px #000000;
-      border: 2px solid rgba(0, 240, 255, 0.3);
+      border: 2px solid rgba(0, 240, 255, 0.25);
     }
 
     #divider-line {
       position: absolute;
       left: 50%;
       top: 0;
-      width: 4px;
+      width: 6px;
       height: 100%;
       background: #000;
       transform: translateX(-50%);
@@ -124,51 +122,28 @@
       display: none;
     }
 
-    /* Painel de Calibração de Convergência Óptica */
-    #calib-panel {
+    /* Botão flutuante sutil de retorno ao Hub (aparece apenas ao tocar na tela) */
+    #quick-back-btn {
       position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      z-index: 100;
-      background: rgba(10, 15, 25, 0.92);
-      border: 1px solid #00f0ff;
-      border-radius: 30px;
-      padding: 8px 22px;
-      align-items: center;
-      gap: 16px;
-      color: #00f0ff;
-      font-size: 13px;
-      font-weight: bold;
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.9);
-    }
-    .adj-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .adj-btn {
-      background: rgba(0, 240, 255, 0.25);
-      border: 1px solid #00f0ff;
-      color: white;
+      top: 15px;
+      left: 15px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #444;
+      color: #aaa;
       padding: 6px 14px;
       border-radius: 20px;
-      font-size: 14px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      font-size: 12px;
+      text-decoration: none;
+      z-index: 50;
+      display: none;
     }
-    .adj-btn:active { background: rgba(0, 240, 255, 0.7); }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
   <div id="container"></div>
 
-  <!-- Moldura das Lentes -->
+  <!-- Lentes Cardboard 100% Desobstruídas -->
   <div id="left-eye-frame" class="eye-frame">
     <div id="lens-left" class="lens-cutout"></div>
   </div>
@@ -177,26 +152,17 @@
   </div>
 
   <div id="divider-line"></div>
-
-  <!-- Botões de Unificação das Linhas em Tempo Real -->
-  <div id="calib-panel">
-    <div class="adj-group">
-      <span>Unificar Linhas:</span>
-      <button id="btn-shift-in" class="adj-btn">◀ Unir Mais</button>
-      <span id="shift-val">50px</span>
-      <button id="btn-shift-out" class="adj-btn">Separar ▶</button>
-    </div>
-  </div>
+  <a id="quick-back-btn" href="index.html">⬅ Calibrar / Hub</a>
 
   <div id="ui-overlay">
-    <div class="badge">🥽 COMPENSAÇÃO DE DISTÂNCIA INTERPUPILAR</div>
+    <div class="badge">🥽 MODO IMERSIVO 100% LIMPO</div>
     <h1 id="sim-title">Quando o segundo Sol chegar...</h1>
     <p>
-      O player aplica a <strong>compensação de convergência óptica Cardboard</strong> para fundir as duas imagens em uma única linha meridiana centralizada.
+      As configurações de <strong>convergência e tamanho de lente</strong> calibradas no Hub serão aplicadas automaticamente para uma visualização sem obstruções.
     </p>
-    <button id="start-btn" class="btn">👓 ENTRAR NO CARDBOARD</button>
+    <button id="start-btn" class="btn">👓 INICIAR NO CARDBOARD</button>
     <br>
-    <a href="index.html" class="btn-back">⬅ Voltar ao Hub</a>
+    <a href="index.html" class="btn-back">⬅ Voltar ao Calibrador do Hub</a>
   </div>
 
   <video id="video-source" loop crossOrigin="anonymous" playsinline webkit-playsinline style="display:none;">
@@ -210,32 +176,27 @@
     let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
     let screenOrientation = 0;
 
-    // Deslocamento de convergência óptica para casar com a distância interpupilar (IPD ~63mm)
-    // Em telas de 6"+, deslocar ~50px para dentro traz a distância de 78mm para 63mm exatos!
-    let eyeShiftPixels = 50; 
+    // Carregar configurações de calibração salvas no Hub
+    let eyeShiftPixels = parseInt(localStorage.getItem('cardboard_shift') || '50');
+    let lensSizePercent = parseInt(localStorage.getItem('cardboard_size') || '86');
 
     const startBtn = document.getElementById('start-btn');
     const uiOverlay = document.getElementById('ui-overlay');
     const leftEyeFrame = document.getElementById('left-eye-frame');
     const rightEyeFrame = document.getElementById('right-eye-frame');
+    const lensLeft = document.getElementById('lens-left');
+    const lensRight = document.getElementById('lens-right');
     const dividerLine = document.getElementById('divider-line');
-    const calibPanel = document.getElementById('calib-panel');
-    const shiftVal = document.getElementById('shift-val');
-    const btnShiftIn = document.getElementById('btn-shift-in');
-    const btnShiftOut = document.getElementById('btn-shift-out');
+    const quickBackBtn = document.getElementById('quick-back-btn');
     video = document.getElementById('video-source');
 
-    btnShiftIn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      eyeShiftPixels += 6;
-      shiftVal.textContent = eyeShiftPixels + 'px';
-    });
-
-    btnShiftOut.addEventListener('click', (e) => {
-      e.stopPropagation();
-      eyeShiftPixels = Math.max(0, eyeShiftPixels - 6);
-      shiftVal.textContent = eyeShiftPixels + 'px';
-    });
+    function applyCalibratedStyle() {
+      const sizeVal = `min(${lensSizePercent * 0.5}vw, ${lensSizePercent}vh)`;
+      lensLeft.style.width = sizeVal;
+      lensLeft.style.height = sizeVal;
+      lensRight.style.width = sizeVal;
+      lensRight.style.height = sizeVal;
+    }
 
     function init() {
       const container = document.getElementById('container');
@@ -264,6 +225,7 @@
       scene.add(mesh);
 
       setupTouchControls();
+      applyCalibratedStyle();
       window.addEventListener('resize', onWindowResize);
       window.addEventListener('orientationchange', () => { screenOrientation = window.orientation || 0; });
       screenOrientation = window.orientation || 0;
@@ -326,7 +288,7 @@
     function setupTouchControls() {
       let isDragging = false;
       window.addEventListener('mousedown', e => { 
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
         isDragging = true; touchStartX = e.clientX; touchStartY = e.clientY; 
       });
       window.addEventListener('mousemove', e => {
@@ -339,13 +301,16 @@
       window.addEventListener('mouseup', () => isDragging = false);
 
       window.addEventListener('touchstart', e => {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
         if (e.touches.length === 1) {
           touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+          // Exibir brevemente o botão de voltar ao tocar
+          quickBackBtn.style.display = 'block';
+          setTimeout(() => { quickBackBtn.style.display = 'none'; }, 4000);
         }
       });
       window.addEventListener('touchmove', e => {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
         if (e.touches.length === 1 && !hasOrientation) {
           lon -= (e.touches[0].clientX - touchStartX) * 0.25;
           lat += (e.touches[0].clientY - touchStartY) * 0.25;
@@ -372,13 +337,13 @@
         camera.aspect = halfWidth / height;
         camera.updateProjectionMatrix();
 
-        // 1. Olho Esquerdo: Deslocado 'eyeShiftPixels' para a direita (em direção ao centro)
+        // 1. Olho Esquerdo: Com deslocamento calibrado de convergência
         renderer.setViewport(0 + eyeShiftPixels, 0, halfWidth, height);
         renderer.setScissor(0, 0, halfWidth, height);
         renderer.setScissorTest(true);
         renderer.render(scene, camera);
 
-        // 2. Olho Direito: Deslocado 'eyeShiftPixels' para a esquerda (em direção ao centro)
+        // 2. Olho Direito: Com deslocamento calibrado de convergência (IDÊNTICO)
         renderer.setViewport(halfWidth - eyeShiftPixels, 0, halfWidth, height);
         renderer.setScissor(halfWidth, 0, halfWidth, height);
         renderer.setScissorTest(true);
@@ -396,7 +361,6 @@
       leftEyeFrame.style.display = 'flex';
       rightEyeFrame.style.display = 'flex';
       dividerLine.style.display = 'block';
-      calibPanel.style.display = 'flex';
 
       video.play().catch(e => console.log("Play error:", e));
       requestMotionPermission();
