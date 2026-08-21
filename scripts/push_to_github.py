@@ -1,30 +1,58 @@
 """
-Script de commit e push para o repositório GitHub via SSH Deploy Key.
+Push completo para o GitHub usando Dulwich e Paramiko com Deploy Key.
 """
 
 import os
-from dulwich import porcelain
+import paramiko
+from dulwich import porcelain, client
 from dulwich.repo import Repo
 
-REPO_SSH = "git@github.com:zaczusantos-ops/planetariumsimullation.git"
 KEY_PATH = os.path.abspath("deploy_key")
+REPO_SSH = "git@github.com:zaczusantos-ops/planetariumsimullation.git"
 
-def push_repo():
+class ParamikoSSHVendor(client.SSHVendor):
+    def run_command(self, host, command, username=None, port=None, **kwargs):
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        pkey = paramiko.Ed25519Key.from_private_key_file(KEY_PATH)
+        ssh.connect(host, port=port or 22, username=username or 'git', pkey=pkey)
+        channel = ssh.get_transport().open_session()
+        channel.exec_command(command)
+        
+        class ChannelWrapper:
+            def __init__(self, ch, client_obj):
+                self.ch = ch
+                self.client_obj = client_obj
+                self.stdout = ch.makefile('rb')
+                self.stdin = ch.makefile('wb')
+                self.stderr = ch.makefile_stderr('rb')
+                
+            def can_read(self):
+                return self.ch.recv_ready()
+                
+            def write(self, data):
+                return self.stdin.write(data)
+                
+            def read(self, n=None):
+                return self.stdout.read(n)
+                
+            def poll(self):
+                return 0 if self.ch.exit_status_ready() else None
+                
+            def wait(self):
+                return self.ch.recv_exit_status()
+
+        return ChannelWrapper(channel, ssh)
+
+def do_push():
     workspace = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(workspace)
     
-    # Criar .gitignore para não enviar a chave privada ou temporários
+    # Criar .gitignore
     with open(".gitignore", "w") as f:
         f.write("deploy_key\nkey.pem\ncert.pem\n__pycache__/\n*.pyc\ncloudflared.exe\n")
-        
-    print(f"Indexando e preparando commit no workspace: {workspace}")
-    
-    try:
-        repo = Repo(workspace)
-    except Exception:
-        repo = Repo.init(workspace)
 
-    # Adicionar todos os arquivos
+    repo = Repo(workspace)
     porcelain.add(workspace, paths=["."])
     
     try:
@@ -34,33 +62,23 @@ def push_repo():
             author=b"Antigravity Agent <agent@antigravity.ai>",
             committer=b"Antigravity Agent <agent@antigravity.ai>"
         )
-        print("Commit realizado com sucesso!")
     except Exception as e:
-        print("Aviso de commit:", e)
+        print("Status commit:", e)
 
-    print(f"Enviando para {REPO_SSH} via Deploy Key...")
-    try:
-        # Configurar chave SSH no dulwich
-        from dulwich.contrib.paramiko_vendor import ParamikoSSHVendor
-        import paramiko
+    print("Configurando cliente SSH...")
+    client.get_ssh_vendor = lambda: ParamikoSSHVendor()
+
+    print(f"Fazendo push para {REPO_SSH} (branch main)...")
+    remote_client, path = client.get_transport_and_path(REPO_SSH)
+    
+    def send_pack(have, want):
+        return repo.object_store.generate_pack_data(have, want)
         
-        class CustomVendor(ParamikoSSHVendor):
-            def __init__(self):
-                super().__init__()
-                self.key_filename = KEY_PATH
-                
-            def run_command(self, host, command, username=None, port=None, **kwargs):
-                client = paramiko.SSHClient()
-                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                k = paramiko.Ed25519Key.from_private_key_file(KEY_PATH)
-                client.connect(host, port=port or 22, username=username or 'git', pkey=k)
-                stdin, stdout, stderr = client.exec_command(command)
-                return stdout.channel
-                
+    try:
         porcelain.push(repo, REPO_SSH, refspecs=[b"HEAD:refs/heads/main"], force=True)
-        print("\n🚀 PUSH CONCLUÍDO COM SUCESSO NO GITHUB!")
+        print("\n[SUCESSO] Todos os arquivos foram enviados para o seu GitHub!")
     except Exception as e:
-        print("\nErro ao fazer push:", e)
+        print("\nErro durante o push:", e)
 
 if __name__ == "__main__":
-    push_repo()
+    do_push()
