@@ -11,8 +11,8 @@ REPO_SSH = "git@github.com:zaczusantos-ops/planetariumsimullation.git"
 
 class WindowsOpenSSHVendor(client.SubprocessSSHVendor):
     def run_command(self, host, command, **kwargs):
-        ssh_cmd = f'ssh -i "{KEY_PATH}" -o StrictHostKeyChecking=no'
-        return super().run_command(host, command, ssh_command=ssh_cmd, **kwargs)
+        kwargs['ssh_command'] = f'ssh -i "{KEY_PATH}" -o StrictHostKeyChecking=no'
+        return super().run_command(host, command, **kwargs)
 
 def do_push():
     workspace = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
