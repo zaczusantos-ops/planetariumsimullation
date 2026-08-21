@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Player Cardboard VR 360° - Modelo de Lentes Circulares</title>
+  <title>Player Cardboard VR 360° - Calibrável</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -83,7 +83,7 @@
       border-radius: 20px;
       text-decoration: none;
     }
-    /* Máscara de Lentes Cardboard (Dois círculos/quadrados arredondados pretos) */
+    /* Máscara de Lentes Circulares com Posição Dinâmica */
     #lens-mask {
       position: absolute;
       top: 0;
@@ -93,9 +93,6 @@
       pointer-events: none;
       z-index: 10;
       display: none;
-      background: 
-        radial-gradient(circle at 25% 50%, transparent 0%, transparent 58%, #000 62%),
-        radial-gradient(circle at 75% 50%, transparent 0%, transparent 58%, #000 62%);
     }
     #divider-line {
       position: absolute;
@@ -103,37 +100,49 @@
       top: 0;
       width: 2px;
       height: 100%;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.25);
       z-index: 12;
       pointer-events: none;
       display: none;
     }
-    #center-dot-left {
+    /* Painel de Calibração Flutuante */
+    #calib-panel {
       position: absolute;
-      left: 25%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 4px;
-      height: 4px;
-      background: rgba(0, 240, 255, 0.4);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 12;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
       display: none;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 24px;
+      padding: 8px 18px;
+      align-items: center;
+      gap: 14px;
+      color: #00f0ff;
+      font-size: 12px;
+      font-weight: bold;
     }
-    #center-dot-right {
-      position: absolute;
-      left: 75%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 4px;
-      height: 4px;
-      background: rgba(0, 240, 255, 0.4);
+    .adj-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .adj-btn {
+      background: rgba(0, 240, 255, 0.2);
+      border: 1px solid #00f0ff;
+      color: white;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      pointer-events: none;
-      z-index: 12;
-      display: none;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
+    .adj-btn:active { background: rgba(0, 240, 255, 0.6); }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -141,16 +150,28 @@
   <div id="container"></div>
   <div id="lens-mask"></div>
   <div id="divider-line"></div>
-  <div id="center-dot-left"></div>
-  <div id="center-dot-right"></div>
+
+  <!-- Controles de Ajuste da Lente e Posição -->
+  <div id="calib-panel">
+    <div class="adj-group">
+      <span>Distância:</span>
+      <button id="btn-dist-minus" class="adj-btn">◀▶</button>
+      <button id="btn-dist-plus" class="adj-btn">▶◀</button>
+    </div>
+    <div class="adj-group">
+      <span>Tamanho:</span>
+      <button id="btn-size-minus" class="adj-btn">-</button>
+      <button id="btn-size-plus" class="adj-btn">+</button>
+    </div>
+  </div>
 
   <div id="ui-overlay">
-    <div class="badge">🥽 MODELO OFICIAL GOOGLE CARDBOARD</div>
+    <div class="badge">🥽 LENTES CARDBOARD CALIBRÁVEIS</div>
     <h1 id="sim-title">Quando o segundo Sol chegar...</h1>
     <p>
-      Formatado com o <strong>padrão de lentes circulares do Cardboard</strong> e <strong>projeção infinita 100% idêntica</strong> para ambos os olhos.
+      Imagens <strong>100% idênticas no infinito</strong> com duas lentes circulares Cardboard. Você pode regular a distância e o tamanho das lentes a qualquer momento nos botões inferiores.
     </p>
-    <button id="start-btn" class="btn">👓 ENTRAR NO MODO CARDBOARD</button>
+    <button id="start-btn" class="btn">👓 ENTRAR NO CARDBOARD</button>
     <br>
     <a href="index.html" class="btn-back">⬅ Voltar ao Hub de Simulações</a>
   </div>
@@ -166,13 +187,56 @@
     let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
     let screenOrientation = 0;
 
+    // Parâmetros de Calibração das Lentes
+    let lensSpacingPercent = 25; // 25% (Centro esquerdo) e 75% (Centro direito)
+    let lensRadiusPercent = 58;  // Tamanho do círculo da lente
+
     const startBtn = document.getElementById('start-btn');
     const uiOverlay = document.getElementById('ui-overlay');
     const lensMask = document.getElementById('lens-mask');
     const dividerLine = document.getElementById('divider-line');
-    const dotL = document.getElementById('center-dot-left');
-    const dotR = document.getElementById('center-dot-right');
+    const calibPanel = document.getElementById('calib-panel');
+    const btnDistMinus = document.getElementById('btn-dist-minus');
+    const btnDistPlus = document.getElementById('btn-dist-plus');
+    const btnSizeMinus = document.getElementById('btn-size-minus');
+    const btnSizePlus = document.getElementById('btn-size-plus');
     video = document.getElementById('video-source');
+
+    function updateLensMask() {
+      const leftPos = lensSpacingPercent;
+      const rightPos = 100 - lensSpacingPercent;
+      const r = lensRadiusPercent;
+      const rFade = r + 4;
+
+      lensMask.style.background = `
+        radial-gradient(circle at ${leftPos}% 50%, transparent 0%, transparent ${r}%, #000 ${rFade}%),
+        radial-gradient(circle at ${rightPos}% 50%, transparent 0%, transparent ${r}%, #000 ${rFade}%)
+      `;
+    }
+
+    btnDistMinus.addEventListener('click', (e) => {
+      e.stopPropagation();
+      lensSpacingPercent = Math.max(15, lensSpacingPercent - 1);
+      updateLensMask();
+    });
+
+    btnDistPlus.addEventListener('click', (e) => {
+      e.stopPropagation();
+      lensSpacingPercent = Math.min(35, lensSpacingPercent + 1);
+      updateLensMask();
+    });
+
+    btnSizeMinus.addEventListener('click', (e) => {
+      e.stopPropagation();
+      lensRadiusPercent = Math.max(35, lensRadiusPercent - 2);
+      updateLensMask();
+    });
+
+    btnSizePlus.addEventListener('click', (e) => {
+      e.stopPropagation();
+      lensRadiusPercent = Math.min(75, lensRadiusPercent + 2);
+      updateLensMask();
+    });
 
     function init() {
       const container = document.getElementById('container');
@@ -194,7 +258,7 @@
       texture.magFilter = THREE.LinearFilter;
       texture.format = THREE.RGBFormat;
 
-      // Esfera 360° astronômica
+      // Esfera astronômica 360
       const geometry = new THREE.SphereGeometry(500, 64, 48);
       geometry.scale(-1, 1, 1);
       const material = new THREE.MeshBasicMaterial({ map: texture });
@@ -205,6 +269,7 @@
       window.addEventListener('resize', onWindowResize);
       window.addEventListener('orientationchange', () => { screenOrientation = window.orientation || 0; });
       screenOrientation = window.orientation || 0;
+      updateLensMask();
     }
 
     function requestMotionPermission() {
@@ -307,17 +372,16 @@
         const height = window.innerHeight;
         const halfWidth = width / 2;
 
-        // Proporção de cada olho no Cardboard (1:1 quadrangular / circular)
         camera.aspect = halfWidth / height;
         camera.updateProjectionMatrix();
 
-        // 1. Olho Esquerdo (Metade Esquerda)
+        // 1. Olho Esquerdo (Projeção IDÊNTICA)
         renderer.setViewport(0, 0, halfWidth, height);
         renderer.setScissor(0, 0, halfWidth, height);
         renderer.setScissorTest(true);
         renderer.render(scene, camera);
 
-        // 2. Olho Direito (Metade Direita - 100% IDÊNTICO)
+        // 2. Olho Direito (Projeção IDÊNTICA)
         renderer.setViewport(halfWidth, 0, halfWidth, height);
         renderer.setScissor(halfWidth, 0, halfWidth, height);
         renderer.setScissorTest(true);
@@ -334,6 +398,7 @@
       uiOverlay.style.display = 'none';
       lensMask.style.display = 'block';
       dividerLine.style.display = 'block';
+      calibPanel.style.display = 'flex';
 
       video.play().catch(e => console.log("Play error:", e));
       requestMotionPermission();
