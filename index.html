@@ -23,12 +23,12 @@
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
-      padding: 30px 20px 60px;
+      padding: 30px 20px 80px;
     }
     header {
       text-align: center;
       max-width: 800px;
-      margin: 0 auto 35px;
+      margin: 0 auto 40px;
     }
     .badge {
       display: inline-block;
@@ -43,145 +43,18 @@
       margin-bottom: 12px;
     }
     h1 {
-      font-size: 30px;
+      font-size: 32px;
       font-weight: 800;
       color: #fff;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       background: linear-gradient(135deg, #ffffff 40%, var(--accent) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     p.subtitle {
-      font-size: 15px;
+      font-size: 16px;
       color: var(--text-muted);
       line-height: 1.5;
-    }
-
-    /* Seção de Calibração das Lentes */
-    .calib-section {
-      max-width: 900px;
-      margin: 0 auto 40px;
-      background: rgba(13, 27, 42, 0.7);
-      border: 1px solid var(--accent);
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 8px 30px rgba(0, 240, 255, 0.15);
-    }
-    .calib-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .calib-header h2 {
-      font-size: 18px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .calib-controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .control-box {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 14px 18px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .control-box label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--accent);
-    }
-    .control-buttons {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .btn-calib {
-      background: rgba(0, 240, 255, 0.15);
-      border: 1px solid var(--accent);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: bold;
-      transition: all 0.2s ease;
-      flex: 1;
-      text-align: center;
-    }
-    .btn-calib:active {
-      background: var(--accent);
-      color: #000;
-    }
-    input[type=range] {
-      width: 100%;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-
-    /* Testador de Visão no Hub */
-    .test-viewer {
-      background: #000;
-      border: 1px solid #333;
-      border-radius: 12px;
-      height: 140px;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-    }
-    .test-half {
-      width: 50%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .test-divider {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      width: 2px;
-      height: 100%;
-      background: #444;
-      transform: translateX(-50%);
-    }
-    .test-lens-cutout {
-      width: 100px;
-      height: 100px;
-      border-radius: 20px;
-      border: 2px solid var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      transition: transform 0.1s ease;
-    }
-    .test-target {
-      width: 12px;
-      height: 12px;
-      background: var(--accent);
-      border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent);
-    }
-    .test-line {
-      position: absolute;
-      width: 2px;
-      height: 100%;
-      background: #00e5ff;
-      box-shadow: 0 0 8px #00e5ff;
     }
 
     /* Grade de Simulações */
@@ -190,7 +63,7 @@
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 24px;
       max-width: 1000px;
-      margin: 0 auto;
+      margin: 0 auto 60px;
     }
     .card {
       background: var(--card-bg);
@@ -246,11 +119,159 @@
       transform: scale(1.02);
     }
     .btn-disabled {
-      background: rgba(255, 255, 255, 0.1);
-      color: #777;
+      background: rgba(255, 255, 255, 0.08);
+      color: #6b7280;
       pointer-events: none;
       box-shadow: none;
     }
+
+    /* Divisor de Seção */
+    .section-divider {
+      max-width: 1000px;
+      margin: 0 auto 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .section-divider::before, .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(0, 240, 255, 0.25);
+    }
+
+    /* Aba de Configurações & Calibração (Fica depois das Simulações) */
+    .settings-section {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(13, 27, 42, 0.8);
+      border: 1px solid var(--accent);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 8px 30px rgba(0, 240, 255, 0.15);
+    }
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .settings-header h2 {
+      font-size: 20px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .control-box {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 16px 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .control-box label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+    .control-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn-calib {
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid var(--accent);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      flex: 1;
+      text-align: center;
+    }
+    .btn-calib:active {
+      background: var(--accent);
+      color: #000;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Testador Visual de Lentes */
+    .test-viewer {
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 12px;
+      height: 150px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+    .test-half {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .test-divider {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: #333;
+      transform: translateX(-50%);
+    }
+    .test-lens-cutout {
+      width: 110px;
+      height: 110px;
+      border-radius: 24px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.1s ease;
+    }
+    .test-target {
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent);
+    }
+    .test-line {
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      background: #00e5ff;
+      box-shadow: 0 0 8px #00e5ff;
+    }
+
     footer {
       text-align: center;
       margin-top: 60px;
@@ -261,22 +282,75 @@
 </head>
 <body>
   <header>
-    <div class="badge">IOAA PLANETARIUM VR</div>
+    <div class="badge">IOAA PLANETARIUM VR HUB</div>
     <h1>🪐 Simulador Astronômico em Realidade Virtual</h1>
     <p class="subtitle">
-      Calibre o seu óculos Cardboard abaixo e selecione uma simulação para assistir em 360° com a tela 100% desobstruída.
+      Escolha uma das simulações astronômicas abaixo para visualizar em 360° no seu óculos VR.
     </p>
   </header>
 
-  <!-- 🛠️ Calibrador de Lentes Cardboard (Fora da Simulação) -->
-  <section class="calib-section">
-    <div class="calib-header">
-      <h2>🛠️ Calibrador de Lentes do seu Cardboard</h2>
-      <span style="font-size: 12px; color: #9ca3af;">Configurações salvas automaticamente ✅</span>
+  <!-- 1. GRADE COM TODAS AS SIMULAÇÕES PRIMEIRO -->
+  <main class="grid">
+    <!-- Simulação 1: Quando o segundo Sol chegar -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema 1 • Sistema Binário</div>
+        <h2>Quando o segundo Sol chegar...</h2>
+        <p>Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.</p>
+      </div>
+      <a href="player.html?v=config" class="btn-launch">
+        👓 INICIAR SIMULAÇÃO VR
+      </a>
     </div>
 
-    <div class="calib-controls">
-      <!-- 1. Separação / Convergência (Unir / Separar Linhas) -->
+    <!-- Simulação 2: Tatooine -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema 2 • Órbita Polar</div>
+        <h2>Tatooine em Órbita Perpendicular</h2>
+        <p>Exoplaneta que orbita um sistema binário em um plano perpendicular (inclinação de 90° em relação ao binário).</p>
+      </div>
+      <a href="player.html?sim=tatooine&v=config" class="btn-launch">
+        👓 INICIAR SIMULAÇÃO VR
+      </a>
+    </div>
+
+    <!-- Simulação 3: Troianos -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema 3 • Pontos de Lagrange</div>
+        <h2>Asteroide Troiano (L4 / L5)</h2>
+        <p>Observador situado no enxame de asteroides troianos na órbita de Júpiter a 5,20 UA do Sol.</p>
+      </div>
+      <a href="#" class="btn-launch btn-disabled">
+        ⏳ EM PROCESSAMENTO
+      </a>
+    </div>
+
+    <!-- Simulação 4: Moonwalk -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema 5 • Lua e Rotação Síncrona</div>
+        <h2>Moonwalk (Observador na Lua)</h2>
+        <p>Visão do céu lunar com a Terra suspensa no céu selenográfico e a rotação síncrona lunar.</p>
+      </div>
+      <a href="#" class="btn-launch btn-disabled">
+        ⏳ EM PROCESSAMENTO
+      </a>
+    </div>
+  </main>
+
+  <div class="section-divider">Configurações do Dispositivo</div>
+
+  <!-- 2. ABA DE CONFIGURAÇÕES E CALIBRAÇÃO (DEPOIS DAS SIMULAÇÕES) -->
+  <section class="settings-section">
+    <div class="settings-header">
+      <h2>⚙️ Configurações & Calibração do Cardboard</h2>
+      <span style="font-size: 13px; color: #00f0ff;">Salvo automaticamente no seu celular ✅</span>
+    </div>
+
+    <div class="settings-grid">
+      <!-- Ajuste 1: Convergência / Unificar Linhas -->
       <div class="control-box">
         <label>
           <span>Convergência das Lentes:</span>
@@ -289,7 +363,7 @@
         </div>
       </div>
 
-      <!-- 2. Tamanho da Abertura da Lente -->
+      <!-- Ajuste 2: Tamanho da Abertura da Lente -->
       <div class="control-box">
         <label>
           <span>Tamanho da Abertura:</span>
@@ -303,8 +377,8 @@
       </div>
     </div>
 
-    <!-- Testador Visual das Lentes no Hub -->
-    <div style="font-size: 13px; color: #9ca3af; margin-bottom: 8px;">Pré-visualização do Alinhamento Óptico:</div>
+    <!-- Testador Visual do Óculos dentro das Configurações -->
+    <div style="font-size: 13px; color: #9ca3af; margin-bottom: 8px;">Pré-visualização do Foco Óptico:</div>
     <div class="test-viewer">
       <div class="test-divider"></div>
       <div class="test-half">
@@ -322,63 +396,11 @@
     </div>
   </section>
 
-  <!-- Lista de Simulações -->
-  <main class="grid">
-    <!-- Card 1: Quando o segundo Sol chegar -->
-    <div class="card">
-      <div>
-        <div class="card-tag">Problema 1 • Sistema Binário</div>
-        <h2>Quando o segundo Sol chegar...</h2>
-        <p>Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.</p>
-      </div>
-      <a href="player.html?v=calibrado" class="btn-launch">
-        👓 INICIAR SIMULAÇÃO VR
-      </a>
-    </div>
-
-    <!-- Card 2: Tatooine -->
-    <div class="card">
-      <div>
-        <div class="card-tag">Problema 2 • Órbita Polar</div>
-        <h2>Tatooine em Órbita Perpendicular</h2>
-        <p>Exoplaneta que orbita um sistema binário em um plano perpendicular (inclinação de 90° em relação ao binário).</p>
-      </div>
-      <a href="player.html?sim=tatooine&v=calibrado" class="btn-launch">
-        👓 INICIAR SIMULAÇÃO VR
-      </a>
-    </div>
-
-    <!-- Card 3: Troianos -->
-    <div class="card">
-      <div>
-        <div class="card-tag">Problema 3 • Pontos de Lagrange</div>
-        <h2>Asteroide Troiano (L4 / L5)</h2>
-        <p>Observador situado no enxame de asteroides troianos na órbita de Júpiter a 5,20 UA do Sol.</p>
-      </div>
-      <a href="#" class="btn-launch btn-disabled">
-        ⏳ EM PROCESSAMENTO
-      </a>
-    </div>
-
-    <!-- Card 4: Moonwalk -->
-    <div class="card">
-      <div>
-        <div class="card-tag">Problema 5 • Lua e Rotação Síncrona</div>
-        <h2>Moonwalk (Observador na Lua)</h2>
-        <p>Visão do céu lunar com a Terra suspensa no céu selenográfico e a rotação síncrona lunar.</p>
-      </div>
-      <a href="#" class="btn-launch btn-disabled">
-        ⏳ EM PROCESSAMENTO
-      </a>
-    </div>
-  </main>
-
   <footer>
     Desenvolvido com Antigravity • Renderização Blender 360° Equirectangular & Three.js WebXR
   </footer>
 
   <script>
-    // Recuperar valores salvos do localStorage
     let shiftVal = parseInt(localStorage.getItem('cardboard_shift') || '50');
     let sizeVal = parseInt(localStorage.getItem('cardboard_size') || '86');
 
@@ -404,8 +426,7 @@
       localStorage.setItem('cardboard_shift', shiftVal);
       localStorage.setItem('cardboard_size', sizeVal);
 
-      // Atualizar preview visual de teste
-      const pxOffset = (shiftVal / 100) * 20; // Escala para o preview pequeno
+      const pxOffset = (shiftVal / 100) * 22;
       testLensL.style.transform = `translateX(${pxOffset}px) scale(${sizeVal / 86})`;
       testLensR.style.transform = `translateX(-${pxOffset}px) scale(${sizeVal / 86})`;
     }
