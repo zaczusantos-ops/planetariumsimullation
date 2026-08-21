@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Player Cardboard VR 360° - Lentes Centradas</title>
+  <title>Player Cardboard VR 360° - Fusão Óptica Perfeita</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -87,7 +87,7 @@
       text-decoration: none;
     }
     
-    /* Molduras das Lentes Cardboard (Centradas em cada 50% da tela) */
+    /* Molduras das Lentes Cardboard */
     .eye-frame {
       position: absolute;
       top: 0;
@@ -103,21 +103,19 @@
     #left-eye-frame { left: 0; }
     #right-eye-frame { left: 50vw; }
 
-    /* Abertura da lente (Quadrado com cantos bem arredondados / Circular) */
     .lens-cutout {
       width: min(44vw, 86vh);
       height: min(44vw, 86vh);
-      border-radius: 50px; /* Quadrado arredondado clássico do Cardboard */
-      box-shadow: 0 0 0 9999px #000000; /* Preenche tudo em volta de preto */
-      border: 2px solid rgba(0, 240, 255, 0.25);
+      border-radius: 50px;
+      box-shadow: 0 0 0 9999px #000000;
+      border: 2px solid rgba(0, 240, 255, 0.3);
     }
 
-    /* Linha divisora central */
     #divider-line {
       position: absolute;
       left: 50%;
       top: 0;
-      width: 6px;
+      width: 4px;
       height: 100%;
       background: #000;
       transform: translateX(-50%);
@@ -126,7 +124,7 @@
       display: none;
     }
 
-    /* Painel de Ajuste Rápido */
+    /* Painel de Calibração de Convergência Óptica */
     #calib-panel {
       position: absolute;
       bottom: 20px;
@@ -134,68 +132,67 @@
       transform: translateX(-50%);
       display: none;
       z-index: 100;
-      background: rgba(10, 15, 25, 0.9);
+      background: rgba(10, 15, 25, 0.92);
       border: 1px solid #00f0ff;
       border-radius: 30px;
-      padding: 8px 20px;
+      padding: 8px 22px;
       align-items: center;
       gap: 16px;
       color: #00f0ff;
       font-size: 13px;
       font-weight: bold;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.9);
+    }
+    .adj-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     .adj-btn {
-      background: rgba(0, 240, 255, 0.2);
+      background: rgba(0, 240, 255, 0.25);
       border: 1px solid #00f0ff;
       color: white;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      font-size: 18px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
       font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
     }
-    .adj-btn:active { background: rgba(0, 240, 255, 0.6); }
+    .adj-btn:active { background: rgba(0, 240, 255, 0.7); }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
   <div id="container"></div>
 
-  <!-- Lente Esquerda (Exatamente no centro dos primeiros 50% da tela) -->
+  <!-- Moldura das Lentes -->
   <div id="left-eye-frame" class="eye-frame">
     <div id="lens-left" class="lens-cutout"></div>
   </div>
-
-  <!-- Lente Direita (Exatamente no centro dos segundos 50% da tela) -->
   <div id="right-eye-frame" class="eye-frame">
     <div id="lens-right" class="lens-cutout"></div>
   </div>
 
   <div id="divider-line"></div>
 
-  <!-- Painel de Calibração do Formato das Lentes -->
+  <!-- Botões de Unificação das Linhas em Tempo Real -->
   <div id="calib-panel">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span>Tamanho da Lente:</span>
-      <button id="btn-size-dec" class="adj-btn">-</button>
-      <button id="btn-size-inc" class="adj-btn">+</button>
-    </div>
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span>Arredondamento:</span>
-      <button id="btn-radius-square" class="adj-btn">⏹</button>
-      <button id="btn-radius-round" class="adj-btn">⏺</button>
+    <div class="adj-group">
+      <span>Unificar Linhas:</span>
+      <button id="btn-shift-in" class="adj-btn">◀ Unir Mais</button>
+      <span id="shift-val">50px</span>
+      <button id="btn-shift-out" class="adj-btn">Separar ▶</button>
     </div>
   </div>
 
   <div id="ui-overlay">
-    <div class="badge">🥽 LENTES CENTRADAS EM CADA PARCELA DA TELA</div>
+    <div class="badge">🥽 COMPENSAÇÃO DE DISTÂNCIA INTERPUPILAR</div>
     <h1 id="sim-title">Quando o segundo Sol chegar...</h1>
     <p>
-      As duas aberturas de lente estão posicionadas <strong>exatamente no centro de cada metade da tela</strong> (25% e 75%), com visão <strong>100% idêntica no infinito</strong>.
+      O player aplica a <strong>compensação de convergência óptica Cardboard</strong> para fundir as duas imagens em uma única linha meridiana centralizada.
     </p>
     <button id="start-btn" class="btn">👓 ENTRAR NO CARDBOARD</button>
     <br>
@@ -213,58 +210,31 @@
     let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
     let screenOrientation = 0;
 
-    let lensSize = 86; // % da altura
-    let isCircle = false;
+    // Deslocamento de convergência óptica para casar com a distância interpupilar (IPD ~63mm)
+    // Em telas de 6"+, deslocar ~50px para dentro traz a distância de 78mm para 63mm exatos!
+    let eyeShiftPixels = 50; 
 
     const startBtn = document.getElementById('start-btn');
     const uiOverlay = document.getElementById('ui-overlay');
     const leftEyeFrame = document.getElementById('left-eye-frame');
     const rightEyeFrame = document.getElementById('right-eye-frame');
-    const lensLeft = document.getElementById('lens-left');
-    const lensRight = document.getElementById('lens-right');
     const dividerLine = document.getElementById('divider-line');
     const calibPanel = document.getElementById('calib-panel');
-    const btnSizeDec = document.getElementById('btn-size-dec');
-    const btnSizeInc = document.getElementById('btn-size-inc');
-    const btnRadiusSquare = document.getElementById('btn-radius-square');
-    const btnRadiusRound = document.getElementById('btn-radius-round');
+    const shiftVal = document.getElementById('shift-val');
+    const btnShiftIn = document.getElementById('btn-shift-in');
+    const btnShiftOut = document.getElementById('btn-shift-out');
     video = document.getElementById('video-source');
 
-    function updateLensStyle() {
-      const sizeVal = `min(${lensSize * 0.5}vw, ${lensSize}vh)`;
-      const radiusVal = isCircle ? '50%' : '50px';
-
-      lensLeft.style.width = sizeVal;
-      lensLeft.style.height = sizeVal;
-      lensLeft.style.borderRadius = radiusVal;
-
-      lensRight.style.width = sizeVal;
-      lensRight.style.height = sizeVal;
-      lensRight.style.borderRadius = radiusVal;
-    }
-
-    btnSizeDec.addEventListener('click', (e) => {
+    btnShiftIn.addEventListener('click', (e) => {
       e.stopPropagation();
-      lensSize = Math.max(60, lensSize - 6);
-      updateLensStyle();
+      eyeShiftPixels += 6;
+      shiftVal.textContent = eyeShiftPixels + 'px';
     });
 
-    btnSizeInc.addEventListener('click', (e) => {
+    btnShiftOut.addEventListener('click', (e) => {
       e.stopPropagation();
-      lensSize = Math.min(96, lensSize + 6);
-      updateLensStyle();
-    });
-
-    btnRadiusSquare.addEventListener('click', (e) => {
-      e.stopPropagation();
-      isCircle = false;
-      updateLensStyle();
-    });
-
-    btnRadiusRound.addEventListener('click', (e) => {
-      e.stopPropagation();
-      isCircle = true;
-      updateLensStyle();
+      eyeShiftPixels = Math.max(0, eyeShiftPixels - 6);
+      shiftVal.textContent = eyeShiftPixels + 'px';
     });
 
     function init() {
@@ -402,14 +372,14 @@
         camera.aspect = halfWidth / height;
         camera.updateProjectionMatrix();
 
-        // 1. Olho Esquerdo (Exatamente na metade esquerda da tela [0 a 50%])
-        renderer.setViewport(0, 0, halfWidth, height);
+        // 1. Olho Esquerdo: Deslocado 'eyeShiftPixels' para a direita (em direção ao centro)
+        renderer.setViewport(0 + eyeShiftPixels, 0, halfWidth, height);
         renderer.setScissor(0, 0, halfWidth, height);
         renderer.setScissorTest(true);
         renderer.render(scene, camera);
 
-        // 2. Olho Direito (Exatamente na metade direita da tela [50% a 100%] - IDÊNTICO)
-        renderer.setViewport(halfWidth, 0, halfWidth, height);
+        // 2. Olho Direito: Deslocado 'eyeShiftPixels' para a esquerda (em direção ao centro)
+        renderer.setViewport(halfWidth - eyeShiftPixels, 0, halfWidth, height);
         renderer.setScissor(halfWidth, 0, halfWidth, height);
         renderer.setScissorTest(true);
         renderer.render(scene, camera);
