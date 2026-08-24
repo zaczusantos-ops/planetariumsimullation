@@ -1,0 +1,345 @@
+
+
+=== PAGE 1 ===
+
+ Planetarium round – problems, solutions, marking 
+1 / 14 
+ 
+ 
+PLANETARIUM ROUND – SOLUTIONS AND MARKING SCHEME  
+ 
+PROBLEM 1 
+ 
+The first projected planetarium image: 
+ 
+ 
+ 
+
+
+=== PAGE 2 ===
+
+ Planetarium round – problems, solutions, marking 
+2 / 14 
+ 
+Student’s map on a worksheet: 
+ 
+ 
+This is the sky above Keszthely at 24h. The map does not show Solar System objects. 
+ 
+Warning and request for national translators: 
+Please don’t move this image from the center of page of student’s worksheet.  
+Please don’t resize this image of student’s worksheet. 
+Thank you. 
+ 
+
+
+=== PAGE 3 ===
+
+ Planetarium round – problems, solutions, marking 
+3 / 14 
+ 
+TASKS, SOLUTIONS, MARKING:  
+ 
+1.1. There are 3 novae on the projected sky at 2 magnitude. Find them, and label them 
+by circles on your answer sheet’s stellar map, at their right position. See the map on next 
+page.  (Each circle at wrong position(s) causes 1 point decrease.) 
+Solution: See the stellar map below.  
+Marking: 3 points/each nova (wrong position: minus 1 point)  maximum: 9 points  
+ 
+ 
+1.2. Mark all globular clusters with X signs on the stellar map attached to your answer 
+sheet, which are members of the Messier catalogue and visible in the projected sky. 
+Write the Messier number of these objects near the X labels. 
+Solution: See the stellar map below. Visible globular clusters: M2, M13, M15, M30, M56, 
+M71, M72, M92. 
+Marking: good position (signed by X): max. 3 points/each. There will be a transparent 
+checking mask (inner circle 5° and outer circle 10° in diameter). X inside the inner circle = 2 
+points, outer circle 1 point. Good Messier number 1 point/each. 
+ maximum: 24 points  
+ 
+ 
+1.3. In which month can you see these constellations (at midnight) in Keszthely? 
+Solution: October 19, 2019.  
+Marking: October = 2 points, September or November = 1 point  maximum: 2 points  
+ 
+ 
+1.4. What is the sidereal time? (To the accuracy of 15 minutes.) 
+Solution: sidereal time is 1h 00m. Suggested method: Gamma Cassiopeiae is near upper 
+culmination. Its RA is 00h 57m. See the stellar map below (meridian). 
+Marking: 1h 00m = 3 points, +15m (1h 15m or 0h 45m) = 2 points, +30m (1h 30m or 0h 
+30m) = 1 point  maximum: 3 points  
+ 
+ 
+1.5. List at least six zodiacal constellations, which partly or entirely can be seen in the 
+shown sky. (Use the official IAU names or abbreviations.) 
+Solution: Sagittarius (Sgr), Capricornus (Cap), Aquarius (Aqr), Pisces (Psc), Aries (Ari), 
+Taurus (Tau), Gemini (Gem), Cancer (Cnc). 
+See the stellar map below. 
+Marking: 1 points/each constellation  maximum: 6 points  
+
+=== PAGE 4 ===
+
+ Planetarium round – problems, solutions, marking 
+4 / 14 
+ 
+ 
+1.1. and 1.2. Places of novae, globular clusters and check masks on transparent checking 
+foil: 
+ 
+ 
+ 
+ 
+
+
+=== PAGE 5 ===
+
+ Planetarium round – problems, solutions, marking 
+5 / 14 
+ 
+ 
+1.5. Visible zodiacal constellations: 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+=== PAGE 6 ===
+
+ Planetarium round – problems, solutions, marking 
+6 / 14 
+ 
+ 
+PROBLEM 2 
+ 
+The second projected planetarium image: 
+ 
+ 
+ 
+We are standing somewhere on the Earth. The map does not show Solar System objects. 
+
+
+=== PAGE 7 ===
+
+ Planetarium round – problems, solutions, marking 
+7 / 14 
+ 
+TASKS, SOLUTIONS, MARKING:  
+ 
+2.1. Determine the geographical latitude of this observing site: …………….°  
+       Its hemisphere:   N  /  S    (Circle the right one.) 
+Solution: Geographical latitude of this observing site: 25°. Constellation Crux shows us the 
+direction the southern celestial pole. The altitude of pole give us our latitude. 
+Marking: latitude between 24–26° = 2 points, within +3° (22°, 23°, 27°, 28°) = 1 point  
+Marking:  Southern hemisphere = 1 point  
+ maximum: 3 points 
+ 
+ 
+2.2. Determine the Azimuth of the 3 brightest star on the projected sky. Azimuth is 
+measured from South to the direction West 0-360°. Write the name of these stars in 
+English or using their Bayer name. (Incorrect star position in a list or on the map causes 
+1 point decrease.) 
+ 
+1st brightest star / name: …………………………….……   Az: ………………°  
+2nd brightest star / name: …………………………….……   Az: ………………°  
+3rd brightest star / name: …………………………….……   Az: ………………°  
+ 
+Solution: 
+1st. brightest star / name: Sirius (α CMa) Az: 82° (74°-90° = 2 points, 64°-74° and 90°-100° = 1 point) 
+2nd brightest star / name: Canopus (α Car) Az: 42° (34°-50° = 2 points, 24°-34° and 50°-66° = 1 point) 
+3rd brightest star / name: Toliman (α Cen) Az: 331° (324°-339° = 2 points, 314°-324° and 339°-349° = 1 point) 
+ 
+Rank  Visual magnitude (mV)  Proper name[1]  Bayer designation  
+1  −26.74  Sun     
+2  −1.46  Sirius  α CMa  
+3  −0.74  Canopus  α Car  
+4  −0.27 (0.01 + 1.33)  Rigil Kentaurus & Toliman  α Cen  
+5  −0.05  Arcturus  α Boo  
+6  0.03 (−0.02–0.07var)  Vega  α Lyr  
+7  0.08 (0.03–0.16var)  Capella  α Aur  
+8  0.13 (0.05–0.18var)  Rigel  β Ori  
+9  0.34  Procyon  α CMi  
+10  0.46 (0.40–0.46var)  Achernar  α Eri  
+Source: https://en.wikipedia.org/wiki/List_of_brightest_stars 
+ 
+Marking:  
+Proper name on a dotted line (in a list) = 2 points each.  
+ 
+Azimuth angles within +2° = 2 points each, within +5° 1 point each.  
+Incorrect position in a list = -1 point. 
+ maximum: 12 points 
+ 
+
+=== PAGE 8 ===
+
+ Planetarium round – problems, solutions, marking 
+8 / 14 
+ 
+ 
+2.3. Yellow × signs show the positions of 3 comets. Witch comet is in the closest position 
+to ecliptic? (Write the number of nearest comet on the dotted line.) 
+Solution: The number two comet is in closest position to ecliptic. (Distances of our comets 
+from ecliptic: No. 1 = 20°, No. 2 = 0°, No. 3 = 30°). The connecting line between Regulus 
+and Spica approximately shows us the direction of ecliptic. 
+Marking: Number two comet = 2 points  maximum: 2 points 
+ 
+ 
+2.4. List the circumpolar constellations seen from the given observing site, using their 
+IAU abbreviations or ‘standard’ names. 
+Solution and Marking:  
+1 point for each of: Octans (Oct), Mensa (Men), Chamaeleon (Cha), Apus (Aps), Hydrus 
+(Hyi), Volans (Vol), Carina (Car), Musca (Mus), Circinus (Cir), Triangulum Australe (TrA), 
+Pavo (Pav), Indus (Ind), Tucana (Tuc), Horologium (Hor), Ara (Ara) 
+ maximum: 9 points 
+ 
+ 
+2.5. Mintaka (δ Orionis = delta Orionis) is setting at this moment. How many hours 
+earlier did it rise? (To the accuracy of 15 minutes.) 
+Solution: 12h. delta Orionis is approximately located on celestial equator (D = -0° 18′). 
+Marking: 2 points for exact value. maximum: 2 points 
+ 
+
+=== PAGE 9 ===
+
+ Planetarium round – problems, solutions, marking 
+9 / 14 
+ 
+ 
+2.1. – 2.5. Coordinates of stars and comets: 
+ 
+ 
+
+
+=== PAGE 10 ===
+
+ Planetarium round – problems, solutions, marking 
+10 / 14 
+ 
+ 
+2.4. Circumpolar constellations: 
+ 
+ 
+ 
+
+
+=== PAGE 11 ===
+
+ Planetarium round – problems, solutions, marking 
+11 / 14 
+ 
+ 
+PROBLEM 3 
+The third projected planetarium image: 
+ 
+ 
+ 
+ 
+We are standing on the Moon now. As seen at this moment, the Earth is centrally 
+eclipses the Sun (see the red circle on the sky). Consequently, the Moon is in one of its 
+nodes now. Assume the longitudinal and latitudinal librations are exactly 0° at this 
+moment. 
+ 
+
+
+=== PAGE 12 ===
+
+ Planetarium round – problems, solutions, marking 
+12 / 14 
+ 
+ 
+TASKS, SOLUTIONS, MARKING:  
+ 
+3.1. Which season is taking place at this moment in Hungary? 
+Solution: Autumn (fall). The Moon, Earth and Sun are located on a same line. The Sun can 
+be observed in Virgo constellation from Earth, next to the Autumnal equinox point. 
+Marking: right answer (Autumn) is 2 points. maximum: 2 points 
+ 
+ 
+3.2. There is a yellow circle on the projected sky (next to the red circle), which denotes 
+minor planet Juno, which is at a distance of 3 AU from the Sun at this moment. Estimate 
+its distance to the Moon now? (Rounded to 0.1 million km.) (Consider all orbits as 
+circles.) 
+Solution: 598.8 (~599) million km. All of the students need to know is that Juno-Sun-Earth-
+Moon are nearly on the same line. Thus, the distance is: 3 AU + 1 AU + d(Earth-Moon) = cca. 
+(4 x 149.6) + 0.4 million km = 598.8 million km. 
+Marking:  
+2 points for +1 million km, 
+1 point for +2 million km.  maximum: 2 points 
+ 
+ 
+3.3. Estimate how much time after the projected event will … 
+…the Sunset at your observing site? ………………………………  
+…the Earth set at your observing site? ………………………………  
+Solution 1: Sunset can be observed about 3-4 days later (meaning in terrestrial time, i.e. 
+Mean Solar Days). The length of the day on the Moon is equal with the period of the lunar 
+phases (synodic month), i.e. 29.53 days (708.72 hours). Thus, the Sun moves 360°/29.53° = 
+12.2°/day on the Lunar sky from East to West. Since at the projected situation the Sun is 
+located 40° above the horizon, and we are exactly on the equator – so 40°/12.2° days are 
+needed for setting = 3.28 days = 78.7 hours. The extent of the Solar disc is not considered 
+here, that makes half an hour more until complete sunset. 
+Marking: between 3-4 days: 4 points, 2 or 5 days: 2 point  maximum: 4 points  
+Solution 2: Earth set can be observed: never. (The Earth-Moon system has synchronous 
+rotation. Our observing site there is on the near side of the Moon, but we are outside the 
+libration zone. The Earth is continuously observable from this place.) 
+Marking: the good answer is 2 points. maximum: 2 point 
+ 
+ 
+3.4. Determine the Lunar (Selenographic) coordinates of the observing site (where you 
+made your present observations): 
+………………° , ………………°   
+What is the name of the large lunar surface area where your observing site belongs to?  
+(See lunar map on next page.) 
+Solution 1: latitude: 0° ,  longitude: 50° E  
+
+=== PAGE 13 ===
+
+ Planetarium round – problems, solutions, marking 
+13 / 14 
+ 
+If we were sitting in the origin of the Selenographic coordinate system, then the Solar Eclipse 
+(by the Earth) would happen at the Zenith. Since the event is seen almost exactly to the 
+direction West, at a horizontal altitude of 40°, this means that we are located on the Lunar 
+equator, about 50° East from the origin of the coordinate system. 
+Marking 1: 
+for latitude: within +2° (between S 2°-N 2°) 3 points, +5° (S 3-5° or N 3-5°) 2 point, 
+for longitude: within +2° (between 48-52°) 3 points, +5° (45°-47° or 53°-55°) 2 point, 
+ 
+ maximum: 6 points  
+Solution 2: Mare Fecunditatis, or „Sea of Fecundity”, or „Sea of Fertility”  
+Marking 2: any one of the above names: 6 points  maximum: 6 points 
+ 
+ 
+3.5. Estimate the distance of the observing site to the Apollo-11 landing place: …… km. 
+Solution: about 800 km.  
+This is a tribute to the Apollo-11 astronauts, on the occasion of the 50 years anniversary of the 
+first Lunar Landing, a few days before the IOAA2019 olympiad. 
+ 
+Let us disregard the latitudinal difference of the Apollo-11 landing site from our observing 
+site (it is less, than 1°). If we do so, we can calculate only with the longitudinal difference, 
+and we can consider, that both sites are on the equator, which is a “great circle” on Moon. The 
+circumference of the Moon’s equator is DMoon*π = 3474 km*3.14 = 10914 km. This belongs 
+to 360°, whilst the longitudinal difference between our sites are 50°-23.473° = 26.527°. Thus, 
+the proportional arc length is: 803.7 km. 
+ 
+ 
+Marking:  
++100 km (between 700-900 km) 6 points,  
++200 km (600-699 km or 901-1000 km) 5 points, 
++300 km (500-599 km or 1001-1100 km) 4 points,  
++400 km (400-499 km or 1101-1200 km) 3 point. maximum: 6 points  
+ 
+ 
+
+=== PAGE 14 ===
+
+ Planetarium round – problems, solutions, marking 
+14 / 14 
+ 
+ 
+Source: Google Moon 
+ 
+Lunar map in a student’s worksheet:  
+ 
+ 

@@ -6,16 +6,17 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>AstroVR Hub - Planetário & Simulações IOAA</title>
+  <title>AstroVR Hub - Prova de Planetário IOAA 2019</title>
   <style>
     :root {
       --bg: #030712;
-      --card-bg: rgba(17, 24, 39, 0.85);
-      --card-border: rgba(0, 240, 255, 0.2);
+      --card-bg: rgba(17, 24, 39, 0.9);
+      --card-border: rgba(0, 240, 255, 0.25);
       --accent: #00f0ff;
       --accent-glow: rgba(0, 240, 255, 0.4);
       --text: #f3f4f6;
       --text-muted: #9ca3af;
+      --sol-bg: rgba(10, 25, 45, 0.8);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -27,18 +28,18 @@
     }
     header {
       text-align: center;
-      max-width: 800px;
+      max-width: 850px;
       margin: 0 auto 40px;
     }
     .badge {
       display: inline-block;
-      background: rgba(0, 240, 255, 0.1);
+      background: rgba(0, 240, 255, 0.12);
       border: 1px solid var(--accent);
       color: var(--accent);
       padding: 4px 14px;
       border-radius: 20px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 1px;
       margin-bottom: 12px;
     }
@@ -52,29 +53,30 @@
       -webkit-text-fill-color: transparent;
     }
     p.subtitle {
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text-muted);
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     /* Grade de Simulações */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-      max-width: 1000px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+      max-width: 1100px;
       margin: 0 auto 60px;
     }
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 18px;
+      padding: 26px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       backdrop-filter: blur(12px);
       transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
     .card:hover {
       transform: translateY(-5px);
@@ -89,7 +91,7 @@
       margin-bottom: 8px;
     }
     .card h2 {
-      font-size: 20px;
+      font-size: 21px;
       margin-bottom: 10px;
       color: #fff;
     }
@@ -97,7 +99,7 @@
       font-size: 14px;
       color: var(--text-muted);
       line-height: 1.5;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .btn-launch {
       display: inline-flex;
@@ -113,22 +115,48 @@
       border-radius: 10px;
       transition: all 0.2s ease;
       box-shadow: 0 4px 15px rgba(0, 150, 255, 0.3);
+      margin-bottom: 12px;
     }
     .btn-launch:hover {
       box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
       transform: scale(1.02);
     }
-    .btn-disabled {
-      background: rgba(255, 255, 255, 0.08);
-      color: #6b7280;
-      pointer-events: none;
-      box-shadow: none;
+
+    /* Accordion de Gabarito */
+    details {
+      background: var(--sol-bg);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 6px;
+      font-size: 13px;
+    }
+    summary {
+      cursor: pointer;
+      color: var(--accent);
+      font-weight: bold;
+      outline: none;
+      user-select: none;
+    }
+    .sol-content {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+    .sol-content ul {
+      margin-left: 18px;
+      margin-top: 6px;
+    }
+    .sol-content li {
+      margin-bottom: 4px;
     }
 
     /* Divisor de Seção */
     .section-divider {
-      max-width: 1000px;
-      margin: 0 auto 30px;
+      max-width: 1100px;
+      margin: 0 auto 35px;
       display: flex;
       align-items: center;
       gap: 15px;
@@ -145,11 +173,11 @@
       background: rgba(0, 240, 255, 0.25);
     }
 
-    /* Aba de Configurações & Calibração (Fica depois das Simulações) */
+    /* Aba de Configurações & Calibração */
     .settings-section {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
-      background: rgba(13, 27, 42, 0.8);
+      background: rgba(13, 27, 42, 0.85);
       border: 1px solid var(--accent);
       border-radius: 18px;
       padding: 28px;
@@ -282,61 +310,119 @@
 </head>
 <body>
   <header>
-    <div class="badge">IOAA PLANETARIUM VR HUB</div>
+    <div class="badge">IOAA 2019 • PROVA OFICIAL DE PLANETÁRIO</div>
     <h1>🪐 Simulador Astronômico em Realidade Virtual</h1>
     <p class="subtitle">
-      Escolha uma das simulações astronômicas abaixo para visualizar em 360° no seu óculos VR.
+      Escolha uma das simulações da olimpíada internacional abaixo para visualizar em 360° no seu óculos VR.
     </p>
   </header>
 
-  <!-- 1. GRADE COM TODAS AS SIMULAÇÕES PRIMEIRO -->
+  <!-- 1. GRADE COM TODAS AS SIMULAÇÕES DA IOAA 2019 + GABARITO OFICIAL -->
   <main class="grid">
-    <!-- Simulação 1: Quando o segundo Sol chegar -->
+    <!-- Simulação 1: IOAA 2019 Problema 1 -->
     <div class="card">
       <div>
-        <div class="card-tag">Problema 1 • Sistema Binário</div>
+        <div class="card-tag">IOAA 2019 • Problema 1</div>
+        <h2>Céu Noturno de Keszthely (Hungria)</h2>
+        <p>Céu à meia-noite CEST com Gama Cassiopeiae culminando no meridiano superior, 3 novas de 2ª magnitude e os 8 aglomerados globulares de Messier.</p>
+      </div>
+      <div>
+        <a href="player.html?sim=ioaa2019_p1&v=20260824" class="btn-launch">
+          👓 ABRIR SIMULAÇÃO VR
+        </a>
+        <details>
+          <summary>📋 Ver Gabarito & Solução Oficial</summary>
+          <div class="sol-content">
+            <strong>Respostas Oficiais:</strong>
+            <ul>
+              <li><strong>1.1. Novas:</strong> 3 estrelas novas em Pegasus, Cygnus e Auriga (marcadas com círculos vermelhos).</li>
+              <li><strong>1.2. Aglomerados de Messier:</strong> M2, M13, M15, M30, M56, M71, M72, M92.</li>
+              <li><strong>1.3. Mês:</strong> Outubro (19 de Outubro de 2019).</li>
+              <li><strong>1.4. Tempo Sideral Local (LST):</strong> 01h 00m (γ Cas em α = 00h 57m no meridiano superior).</li>
+              <li><strong>1.5. Constelações Zodiacais:</strong> Sgr, Cap, Aqr, Psc, Ari, Tau, Gem, Cnc.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Simulação 2: IOAA 2019 Problema 2 -->
+    <div class="card">
+      <div>
+        <div class="card-tag">IOAA 2019 • Problema 2</div>
+        <h2>Observador a 25° de Latitude Sul</h2>
+        <p>O Cruzeiro do Sul aponta para o Polo Celeste Sul a 25° de altitude. Sirius, Canopus e Alpha Cen em seus azimutes exatos, com Mintaka se pondo no Oeste e 3 cometas.</p>
+      </div>
+      <div>
+        <a href="player.html?sim=ioaa2019_p2&v=20260824" class="btn-launch">
+          👓 ABRIR SIMULAÇÃO VR
+        </a>
+        <details>
+          <summary>📋 Ver Gabarito & Solução Oficial</summary>
+          <div class="sol-content">
+            <strong>Respostas Oficiais:</strong>
+            <ul>
+              <li><strong>2.1. Latitude:</strong> 25° Sul (Hemisfério Sul, altitude do SCP = 25°).</li>
+              <li><strong>2.2. 3 Estrelas mais Brilhantes e Azimutes:</strong>
+                <ul>
+                  <li>1ª Sirius (α CMa): Az = 82°</li>
+                  <li>2ª Canopus (α Car): Az = 42°</li>
+                  <li>3ª Toliman / Alpha Cen (α Cen): Az = 331°</li>
+                </ul>
+              </li>
+              <li><strong>2.3. Cometa na Eclíptica:</strong> Cometa nº 2 (sobre a linha Regulus-Spica).</li>
+              <li><strong>2.4. Constelações Circumpolares:</strong> Oct, Men, Cha, Aps, Hyi, Vol, Car, Mus, Cir, TrA, Pav, Ind, Tuc, Hor, Ara.</li>
+              <li><strong>2.5. Poente de Mintaka (δ Ori):</strong> Nasceu exatamente 12 horas antes (situada no Equador Celeste, Dec ≈ 0°).</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Simulação 3: IOAA 2019 Problema 3 -->
+    <div class="card">
+      <div>
+        <div class="card-tag">IOAA 2019 • Problema 3</div>
+        <h2>Observador na Lua: Eclipse Solar pela Terra</h2>
+        <p>Observador no equador lunar em Mare Fecunditatis (0°, 50° E) vendo a Terra ocultar centralmente o Sol a 40° de altitude a Oeste, com o planeta menor Juno próximo.</p>
+      </div>
+      <div>
+        <a href="player.html?sim=ioaa2019_p3&v=20260824" class="btn-launch">
+          👓 ABRIR SIMULAÇÃO VR
+        </a>
+        <details>
+          <summary>📋 Ver Gabarito & Solução Oficial</summary>
+          <div class="sol-content">
+            <strong>Respostas Oficiais:</strong>
+            <ul>
+              <li><strong>3.1. Estação na Hungria:</strong> Outono (Sol em Virgem próximo ao equinócio de outono).</li>
+              <li><strong>3.2. Distância de Juno à Lua:</strong> ~599 milhões de km ($3\text{ UA} + 1\text{ UA} + d_{\text{Terra-Lua}} = 598,8\text{ milhões de km}$).</li>
+              <li><strong>3.3. Pôr do Sol e Pôr da Terra:</strong>
+                <ul>
+                  <li>Pôr do Sol: ~3,3 dias terrestres depois (Sol desce 12,2°/dia, 40°/12,2° ≈ 3,28 dias).</li>
+                  <li>Pôr da Terra: <strong>Nunca</strong> (rotação síncrona lunar, Terra suspensa permanentemente no céu).</li>
+                </ul>
+              </li>
+              <li><strong>3.4. Coordenadas Selenográficas & Local:</strong> Lat 0°, Long 50° E — <em>Mare Fecunditatis</em> (Mar da Fecundidade).</li>
+              <li><strong>3.5. Distância ao Pouso da Apollo 11 (0.69° N, 23.43° E):</strong> ~804 km ($26.53^\circ \times \frac{10914\text{ km}}{360^\circ}$).</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Simulação 4: Quando o segundo Sol chegar -->
+    <div class="card">
+      <div>
+        <div class="card-tag">Problema Clássico • Binário</div>
         <h2>Quando o segundo Sol chegar...</h2>
         <p>Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.</p>
       </div>
-      <a href="player.html?v=config" class="btn-launch">
-        👓 INICIAR SIMULAÇÃO VR
-      </a>
-    </div>
-
-    <!-- Simulação 2: Tatooine -->
-    <div class="card">
       <div>
-        <div class="card-tag">Problema 2 • Órbita Polar</div>
-        <h2>Tatooine em Órbita Perpendicular</h2>
-        <p>Exoplaneta que orbita um sistema binário em um plano perpendicular (inclinação de 90° em relação ao binário).</p>
+        <a href="player.html?sim=quando_o_segundo_sol_chegar&v=20260824" class="btn-launch">
+          👓 ABRIR SIMULAÇÃO VR
+        </a>
       </div>
-      <a href="player.html?sim=tatooine&v=config" class="btn-launch">
-        👓 INICIAR SIMULAÇÃO VR
-      </a>
-    </div>
-
-    <!-- Simulação 3: Troianos -->
-    <div class="card">
-      <div>
-        <div class="card-tag">Problema 3 • Pontos de Lagrange</div>
-        <h2>Asteroide Troiano (L4 / L5)</h2>
-        <p>Observador situado no enxame de asteroides troianos na órbita de Júpiter a 5,20 UA do Sol.</p>
-      </div>
-      <a href="#" class="btn-launch btn-disabled">
-        ⏳ EM PROCESSAMENTO
-      </a>
-    </div>
-
-    <!-- Simulação 4: Moonwalk -->
-    <div class="card">
-      <div>
-        <div class="card-tag">Problema 5 • Lua e Rotação Síncrona</div>
-        <h2>Moonwalk (Observador na Lua)</h2>
-        <p>Visão do céu lunar com a Terra suspensa no céu selenográfico e a rotação síncrona lunar.</p>
-      </div>
-      <a href="#" class="btn-launch btn-disabled">
-        ⏳ EM PROCESSAMENTO
-      </a>
     </div>
   </main>
 

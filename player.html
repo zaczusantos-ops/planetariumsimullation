@@ -155,21 +155,59 @@
   <a id="quick-back-btn" href="index.html">⬅ Calibrar / Hub</a>
 
   <div id="ui-overlay">
-    <div class="badge">🥽 MODO IMERSIVO 100% LIMPO</div>
-    <h1 id="sim-title">Quando o segundo Sol chegar...</h1>
-    <p>
+    <div id="sim-badge" class="badge">🥽 MODO IMERSIVO 100% LIMPO</div>
+    <h1 id="sim-title">Carregando Simulação...</h1>
+    <p id="sim-desc">
       As configurações de <strong>convergência e tamanho de lente</strong> calibradas no Hub serão aplicadas automaticamente para uma visualização sem obstruções.
     </p>
     <button id="start-btn" class="btn">👓 INICIAR NO CARDBOARD</button>
     <br>
-    <a href="index.html" class="btn-back">⬅ Voltar ao Calibrador do Hub</a>
+    <a href="index.html" class="btn-back">⬅ Voltar ao Hub</a>
   </div>
 
   <video id="video-source" loop crossOrigin="anonymous" playsinline webkit-playsinline style="display:none;">
-    <source src="output_videos/quando_o_segundo_sol_chegar_VR360.mp4" type="video/mp4">
+    <source id="video-src" src="output_videos/quando_o_segundo_sol_chegar_VR360.mp4" type="video/mp4">
   </video>
 
   <script>
+    // Catálogo de Simulações
+    const SIM_DATABASE = {
+      'ioaa2019_p1': {
+        title: 'IOAA 2019 • Problema 1: Céu de Keszthely',
+        badge: '🇭🇺 IOAA 2019 • HUNGARY ROUND 1',
+        desc: 'Céu à meia-noite em Keszthely (LST = 01h 00m) com γ Cassiopeiae no meridiano, 3 novas de 2ª magnitude e os 8 aglomerados de Messier.',
+        video: 'output_videos/ioaa2019_p1_keszthely_VR360.mp4'
+      },
+      'ioaa2019_p2': {
+        title: 'IOAA 2019 • Problema 2: Latitude 25° Sul',
+        badge: '🌐 IOAA 2019 • HUNGARY ROUND 2',
+        desc: 'Céu do hemisfério sul (Lat 25° S) com o Cruzeiro do Sul apontando para o SCP a 25° de altitude, Sirius, Canopus, Alpha Cen e 3 cometas.',
+        video: 'output_videos/ioaa2019_p2_latitude25s_VR360.mp4'
+      },
+      'ioaa2019_p3': {
+        title: 'IOAA 2019 • Problema 3: Eclipse na Lua',
+        badge: '🌕 IOAA 2019 • HUNGARY ROUND 3',
+        desc: 'Observador em Mare Fecunditatis (0°, 50° E) vendo a Terra ocultar centralmente o Sol a 40° de altitude a Oeste, com Juno a 3 UA do Sol.',
+        video: 'output_videos/ioaa2019_p3_lunar_eclipse_VR360.mp4'
+      },
+      'quando_o_segundo_sol_chegar': {
+        title: 'Quando o segundo Sol chegar...',
+        badge: '🪐 SISTEMA BINÁRIO SINCRONIZADO',
+        desc: 'Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.',
+        video: 'output_videos/quando_o_segundo_sol_chegar_VR360.mp4'
+      }
+    };
+
+    // Obter parâmetro da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const simKey = urlParams.get('sim') || 'ioaa2019_p1';
+    const currentSim = SIM_DATABASE[simKey] || SIM_DATABASE['ioaa2019_p1'];
+
+    document.getElementById('sim-title').textContent = currentSim.title;
+    document.getElementById('sim-badge').textContent = currentSim.badge;
+    document.getElementById('sim-desc').textContent = currentSim.desc;
+    document.getElementById('video-src').src = currentSim.video;
+
     let scene, camera, renderer, video, texture, mesh;
     let isVR = false;
     let hasOrientation = false;
@@ -189,6 +227,7 @@
     const dividerLine = document.getElementById('divider-line');
     const quickBackBtn = document.getElementById('quick-back-btn');
     video = document.getElementById('video-source');
+    video.load();
 
     function applyCalibratedStyle() {
       const sizeVal = `min(${lensSizePercent * 0.5}vw, ${lensSizePercent}vh)`;
@@ -304,7 +343,6 @@
         if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
         if (e.touches.length === 1) {
           touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
-          // Exibir brevemente o botão de voltar ao tocar
           quickBackBtn.style.display = 'block';
           setTimeout(() => { quickBackBtn.style.display = 'none'; }, 4000);
         }
