@@ -1,7 +1,7 @@
 """
 Planetarium Core Engine - Mecanismo Universal de Planetário Astronômico
 Utiliza o catálogo estelar real HYG 3.8 (Hipparcos + Yale + Gliese) e catálogo Messier.
-Por padrão, não exibe linhas artificiais de constelação para manter o realismo das provas da IOAA.
+Suporta controle de poluição luminosa (magnitude limite / escala de Bortle).
 """
 
 import bpy
@@ -115,18 +115,29 @@ def setup_vr_scene():
 
     return scene
 
-def build_planetarium_sky(scene, lat_deg, lst_hours, max_mag=6.0, R=80.0, show_constellation_lines=False):
+def build_planetarium_sky(scene, lat_deg, lst_hours, max_mag=6.0, R=80.0, show_constellation_lines=False, light_pollution_bortle=1):
     """
     Popula a cena do Blender com o céu real autêntico.
-    Linhas de constelação desativadas por padrão para realismo de olimpíadas.
+    Ajusta a magnitude limite de acordo com a escala de poluição luminosa (Bortle 1 a 9).
     """
+    # Converter escala de Bortle (1-9) em magnitude limite de corte (mlim)
+    # Bortle 1: mlim ~ 6.5
+    # Bortle 4: mlim ~ 5.0
+    # Bortle 7: mlim ~ 3.5
+    # Bortle 9: mlim ~ 2.0
+    bortle_to_mag = {
+        1: 6.5, 2: 6.0, 3: 5.5, 4: 5.0, 5: 4.5,
+        6: 4.0, 7: 3.5, 8: 2.8, 9: 2.0
+    }
+    effective_max_mag = min(max_mag, bortle_to_mag.get(light_pollution_bortle, 6.0))
+    
     lat_rad = math.radians(lat_deg)
     lst_rad = math.radians(lst_hours * 15.0)
     
-    stars = load_real_stars("data/hyg.csv", max_mag=max_mag)
-    print(f"[Planetarium Core] Carregando {len(stars)} estrelas reais (mag <= {max_mag})...")
+    stars = load_real_stars("data/hyg.csv", max_mag=effective_max_mag)
+    print(f"[Planetarium Core] Carregando {len(stars)} estrelas reais (Bortle {light_pollution_bortle}, mag <= {effective_max_mag:.1f})...")
 
-    # Shaders físicos por classe espectral (Temperatura de corpo negro das estrelas)
+    # Emissões calibradas
     spectral_mats = {
         'O': create_emission_mat("StarMat_O", (0.75, 0.85, 1.0, 1.0), strength=14.0),
         'B': create_emission_mat("StarMat_B", (0.80, 0.90, 1.0, 1.0), strength=11.0),
@@ -148,9 +159,9 @@ def build_planetarium_sky(scene, lat_deg, lst_hours, max_mag=6.0, R=80.0, show_c
             y = R * math.cos(alt_rad) * math.cos(az_rad)
             z = R * math.sin(alt_rad)
             
-            # Escala fotométrica realista de Pogson
             mag = s['mag']
-            radius = max(0.11, 0.62 * math.pow(10, -0.16 * mag))
+            # Escala de Pogson com contraste ampliado para estrelas brilhantes em poluição urbana
+            radius = max(0.12, 0.65 * math.pow(10, -0.16 * mag))
             
             spect_char = s['spect'][0] if s['spect'] else 'A'
             mat = spectral_mats.get(spect_char, default_mat)
@@ -160,5 +171,5 @@ def build_planetarium_sky(scene, lat_deg, lst_hours, max_mag=6.0, R=80.0, show_c
             star_obj.name = s['proper'] if s['proper'] else f"Star_{s['con']}_{mag:.1f}"
             star_obj.data.materials.append(mat)
             
-    print(f"[Planetarium Core] Total de estrelas visíveis no céu renderizadas: {visible_count}")
+    print(f"[Planetarium Core] Total de estrelas visíveis renderizadas: {visible_count}")
     return visible_count

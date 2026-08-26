@@ -4,104 +4,247 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>AstroVR Hub - Provas Reais de Planetário IOAA</title>
+  <title>AstroVR Studio • Planetarium & Simulation Maker</title>
+  <!-- Three.js para o Preview 3D Interativo do Maker -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
-      --bg: #030712;
-      --card-bg: rgba(17, 24, 39, 0.92);
-      --card-border: rgba(0, 240, 255, 0.25);
+      --bg: #090a0f;
+      --sidebar-bg: rgba(14, 16, 24, 0.85);
+      --card-bg: rgba(18, 21, 33, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
       --accent: #00f0ff;
-      --accent-glow: rgba(0, 240, 255, 0.4);
-      --text: #f3f4f6;
-      --text-muted: #9ca3af;
-      --sol-bg: rgba(10, 25, 45, 0.85);
+      --accent-rgb: 0, 240, 255;
+      --accent-glow: rgba(0, 240, 255, 0.35);
+      --text: #f1f5f9;
+      --text-muted: #8e9bb0;
+      --sidebar-w: 260px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: radial-gradient(circle at top center, #0d1b2a 0%, #030712 100%);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 20% 15%, rgba(0, 240, 255, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 80% 85%, rgba(138, 43, 226, 0.04) 0%, transparent 50%);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
-      padding: 30px 20px 80px;
-    }
-    header {
-      text-align: center;
-      max-width: 850px;
-      margin: 0 auto 40px;
-    }
-    .badge {
-      display: inline-block;
-      background: rgba(0, 240, 255, 0.12);
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 32px;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #ffffff 40%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    p.subtitle {
-      font-size: 15px;
-      color: var(--text-muted);
-      line-height: 1.6;
+      display: flex;
+      overflow-x: hidden;
     }
 
-    /* Grade de Simulações */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 28px;
-      max-width: 1100px;
-      margin: 0 auto 60px;
-    }
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 26px;
+    /* BARRA LATERAL ESTILO ARC BROWSER */
+    aside.sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(24px);
+      border-right: 1px solid var(--card-border);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      backdrop-filter: blur(12px);
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      padding: 24px 16px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .card:hover {
-      transform: translateY(-5px);
-      border-color: var(--accent);
-      box-shadow: 0 10px 30px var(--accent-glow);
+    aside.sidebar.collapsed {
+      transform: translateX(calc(-1 * var(--sidebar-w) + 64px));
     }
-    .card-tag {
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: bold;
-      text-transform: uppercase;
-      margin-bottom: 8px;
+    aside.sidebar.collapsed .nav-text,
+    aside.sidebar.collapsed .brand-text,
+    aside.sidebar.collapsed .sidebar-footer-text {
+      display: none;
     }
-    .card h2 {
-      font-size: 21px;
-      margin-bottom: 10px;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px 24px;
+      border-bottom: 1px solid var(--card-border);
+      cursor: pointer;
+    }
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #00f0ff, #7928ca);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+    .brand-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
       color: #fff;
     }
-    .card p {
-      font-size: 14px;
+    .brand-text span {
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Cápsulas de Navegação */
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 20px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+    .nav-item.active {
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 25%;
+      height: 50%;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 0 4px 4px 0;
+      box-shadow: 0 0 10px var(--accent);
+    }
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(0, 240, 255, 0.2);
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* Botão Toggle da Sidebar */
+    .sidebar-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+    .sidebar-toggle:hover { color: #fff; }
+
+    /* CONTEÚDO PRINCIPAL */
+    main.content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 40px 48px 100px;
+      max-width: 1280px;
+      transition: margin-left 0.3s ease;
+    }
+    aside.sidebar.collapsed ~ main.content {
+      margin-left: 64px;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.3s ease forwards;
+    }
+    .view-section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cabeçalho da Seção */
+    .view-header {
+      margin-bottom: 32px;
+    }
+    .view-tag {
+      display: inline-block;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .view-header h2 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .view-header p {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      max-width: 680px;
+      line-height: 1.5;
+    }
+
+    /* Grade de Cartões */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 22px;
+    }
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .glass-card:hover {
+      border-color: rgba(0, 240, 255, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 240, 255, 0.12);
+    }
+    .card-top h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .card-top p {
+      font-size: 13.5px;
       color: var(--text-muted);
       line-height: 1.5;
       margin-bottom: 18px;
     }
-    .btn-launch {
+
+    .btn-pill {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -109,137 +252,91 @@
       background: linear-gradient(135deg, #00d2ff, #0066ff);
       color: #fff;
       text-decoration: none;
+      font-size: 13.5px;
       font-weight: 700;
-      font-size: 15px;
-      padding: 14px 20px;
-      border-radius: 10px;
+      padding: 12px 20px;
+      border-radius: 50px;
       transition: all 0.2s ease;
       box-shadow: 0 4px 15px rgba(0, 150, 255, 0.3);
-      margin-bottom: 12px;
+      cursor: pointer;
+      border: none;
+      width: 100%;
     }
-    .btn-launch:hover {
-      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+    .btn-pill:hover {
       transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.4);
     }
 
-    /* Accordion de Gabarito */
-    details {
-      background: var(--sol-bg);
-      border: 1px solid rgba(0, 240, 255, 0.2);
+    details.solution-box {
+      margin-top: 10px;
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid rgba(0, 240, 255, 0.15);
       border-radius: 10px;
       padding: 10px 14px;
-      margin-top: 6px;
       font-size: 13px;
     }
-    summary {
+    details.solution-box summary {
       cursor: pointer;
       color: var(--accent);
-      font-weight: bold;
+      font-weight: 600;
       outline: none;
       user-select: none;
     }
-    .sol-content {
+    .solution-body {
       margin-top: 10px;
       padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       color: #cbd5e1;
       line-height: 1.6;
     }
-    .sol-content ul {
-      margin-left: 18px;
-      margin-top: 6px;
-    }
-    .sol-content li {
-      margin-bottom: 4px;
-    }
 
-    /* Divisor de Seção */
-    .section-divider {
-      max-width: 1100px;
-      margin: 0 auto 35px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      color: var(--accent);
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .section-divider::before, .section-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(0, 240, 255, 0.25);
-    }
-
-    /* Aba de Configurações & Calibração */
-    .settings-section {
-      max-width: 1100px;
-      margin: 0 auto;
-      background: rgba(13, 27, 42, 0.85);
-      border: 1px solid var(--accent);
-      border-radius: 18px;
-      padding: 28px;
-      box-shadow: 0 8px 30px rgba(0, 240, 255, 0.15);
-    }
-    .settings-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .settings-header h2 {
-      font-size: 20px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .settings-grid {
+    /* MAKER STUDIO LAYOUT */
+    .maker-layout {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-bottom: 24px;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 28px;
     }
-    .control-box {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 16px 20px;
+    @media (max-width: 960px) {
+      .maker-layout { grid-template-columns: 1fr; }
+      aside.sidebar { width: 64px; }
+      aside.sidebar .nav-text, aside.sidebar .brand-text, aside.sidebar .sidebar-footer-text { display: none; }
+      main.content { margin-left: 64px; padding: 24px; }
+    }
+    .maker-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .form-group {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 18px;
     }
-    .control-box label {
+    .form-group label {
       display: flex;
       justify-content: space-between;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
-      margin-bottom: 10px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .form-group label span.val {
       color: var(--accent);
     }
-    .control-buttons {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .btn-calib {
-      background: rgba(0, 240, 255, 0.15);
-      border: 1px solid var(--accent);
-      color: white;
-      padding: 10px 16px;
+    input[type=text], textarea, select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 10px 14px;
       border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: bold;
-      transition: all 0.2s ease;
-      flex: 1;
-      text-align: center;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s;
     }
-    .btn-calib:active {
-      background: var(--accent);
-      color: #000;
+    input[type=text]:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
     }
     input[type=range] {
       width: 100%;
@@ -247,304 +344,733 @@
       cursor: pointer;
     }
 
-    /* Testador Visual de Lentes */
-    .test-viewer {
-      background: #000;
-      border: 1px solid #333;
-      border-radius: 12px;
-      height: 150px;
-      position: relative;
-      overflow: hidden;
+    .preset-chips {
       display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
     }
-    .test-half {
-      width: 50%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
+    .chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .test-divider {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      width: 2px;
-      height: 100%;
-      background: #333;
-      transform: translateX(-50%);
-    }
-    .test-lens-cutout {
-      width: 110px;
-      height: 110px;
-      border-radius: 24px;
-      border: 2px solid var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      transition: transform 0.1s ease;
-    }
-    .test-target {
-      width: 14px;
-      height: 14px;
-      background: var(--accent);
-      border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent);
-    }
-    .test-line {
-      position: absolute;
-      width: 2px;
-      height: 100%;
-      background: #00e5ff;
-      box-shadow: 0 0 8px #00e5ff;
+    .chip:hover {
+      background: rgba(0, 240, 255, 0.15);
+      color: #fff;
+      border-color: var(--accent);
     }
 
-    footer {
-      text-align: center;
-      margin-top: 60px;
-      color: #6b7280;
-      font-size: 13px;
+    /* Live 3D Preview Box */
+    .preview-box {
+      background: #000;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      height: 380px;
+      position: relative;
+      overflow: hidden;
+    }
+    #three-preview-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .preview-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(10, 15, 25, 0.85);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: bold;
+      pointer-events: none;
+    }
+    .preview-controls {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    .preview-stat {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    /* Poluição Luminosa - Escala de Bortle */
+    .bortle-scale-bar {
+      display: flex;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+      background: linear-gradient(to right, #001f3f, #0074D9, #39CCCC, #2ECC40, #FFDC00, #FF851B, #FF4136);
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="badge">PROVAS OFICIAIS DE PLANETÁRIO • CATÁLOGO REAL HYG</div>
-    <h1>🪐 Simulador Astronômico em Realidade Virtual</h1>
-    <p class="subtitle">
-      Céus 100% autênticos gerados a partir do catálogo astronômico real (5.071 estrelas). Escolha um desafio abaixo para explorar em 360° no Cardboard.
-    </p>
-  </header>
 
-  <!-- 1. GRADE COM TODAS AS SIMULAÇÕES -->
-  <main class="grid">
-    <!-- Simulação 1: IOAA 2019 Problema 1 -->
-    <div class="card">
-      <div>
-        <div class="card-tag">IOAA 2019 • Problema 1 (Céu Real)</div>
-        <h2>Céu Noturno de Keszthely (Hungria)</h2>
-        <p>Céu real à meia-noite CEST com Gama Cassiopeiae culminando no meridiano superior, 3 novas de 2ª magnitude e os 8 aglomerados globulares de Messier.</p>
+  <!-- BARRA LATERAL ESTILO ARC BROWSER -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="brand" onclick="switchSpace('explore')">
+        <div class="brand-icon">🪐</div>
+        <div class="brand-text">
+          <h1>AstroVR Studio</h1>
+          <span>IOAA & Stellarium Core</span>
+        </div>
       </div>
-      <div>
-        <a href="player.html?sim=ioaa2019_p1&v=real_sky" class="btn-launch">
-          👓 ABRIR SIMULAÇÃO VR
-        </a>
-        <details>
-          <summary>📋 Ver Gabarito & Solução Oficial</summary>
-          <div class="sol-content">
-            <strong>Respostas Oficiais:</strong>
-            <ul>
-              <li><strong>1.1. Novas:</strong> 3 estrelas novas em Pegasus, Cygnus e Auriga (com anéis indicadores).</li>
-              <li><strong>1.2. Aglomerados de Messier:</strong> M2, M13, M15, M30, M56, M71, M72, M92.</li>
-              <li><strong>1.3. Mês:</strong> Outubro (19 de Outubro de 2019).</li>
-              <li><strong>1.4. Tempo Sideral Local (LST):</strong> 01h 00m (γ Cas em α = 00h 57m no meridiano superior).</li>
-              <li><strong>1.5. Constelações Zodiacais:</strong> Sgr, Cap, Aqr, Psc, Ari, Tau, Gem, Cnc.</li>
-            </ul>
-          </div>
-        </details>
+
+      <div class="nav-group">
+        <div class="nav-item active" data-space="explore" onclick="switchSpace('explore')">
+          <span>🌌</span>
+          <span class="nav-text">Explorar Simulações</span>
+          <span class="nav-badge">4</span>
+        </div>
+
+        <div class="nav-item" data-space="my-sims" onclick="switchSpace('my-sims')">
+          <span>🧪</span>
+          <span class="nav-text">Minhas Simulações</span>
+          <span id="my-sims-badge" class="nav-badge">0</span>
+        </div>
+
+        <div class="nav-item" data-space="maker" onclick="switchSpace('maker')">
+          <span>🛠️</span>
+          <span class="nav-text">Maker Studio</span>
+          <span class="nav-badge" style="background: rgba(138, 43, 226, 0.3); color: #d8b4fe;">NOVO</span>
+        </div>
+
+        <div class="nav-item" data-space="settings" onclick="switchSpace('settings')">
+          <span>⚙️</span>
+          <span class="nav-text">Configurações & VR</span>
+        </div>
       </div>
     </div>
 
-    <!-- Simulação 2: IOAA Problema 2 (Desafio Secreto de Latitude) -->
-    <div class="card">
-      <div>
-        <div class="card-tag">IOAA Desafio • Problema 2 (Céu Real)</div>
-        <h2>Desafio: Descubra a Latitude do Local</h2>
-        <p>Você está em um local desconhecido da Terra. Olhe ao redor em 360°, localize o polo celeste e meça sua altitude angular acima do horizonte para descobrir a latitude e o hemisfério!</p>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--card-border);">
+      <span class="sidebar-footer-text" style="font-size: 11px; color: var(--text-muted);">v2.5 • Catálogo Real HYG</span>
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Recolher Barra">◀</button>
+    </div>
+  </aside>
+
+  <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+  <main class="content">
+
+    <!-- 1. ESPAÇO: EXPLORAR SIMULAÇÕES -->
+    <section id="space-explore" class="view-section active">
+      <div class="view-header">
+        <div class="view-tag">Catálogo Oficial de Provas • IOAA</div>
+        <h2>Explorar Simulações de Planetário</h2>
+        <p>Céus 100% autênticos gerados com a base de dados astronômica aberta HYG 3.8 (5.071 estrelas). Escolha um problema para explorar em 360° no Cardboard.</p>
       </div>
-      <div>
-        <a href="player.html?sim=ioaa2019_p2&v=real_sky" class="btn-launch">
-          👓 ABRIR DESAFIO NO VR
-        </a>
-        <details>
-          <summary>👁️ Revelar Resposta & Gabarito do Desafio</summary>
-          <div class="sol-content">
-            <strong>Gabarito do Desafio:</strong>
-            <ul>
-              <li><strong>2.1. Latitude do Local:</strong> <strong>33° Sul</strong> (Hemisfério Sul, altitude do Polo Celeste Sul = 33° acima do horizonte Sul).</li>
-              <li><strong>2.2. Como Identificar:</strong> O Cruzeiro do Sul aponta para o Polo Celeste Sul (SCP) a exatamente 33° de altura.</li>
-              <li><strong>2.3. Estrelas Mais Brilhantes Visíveis:</strong>
+
+      <div class="card-grid">
+        <!-- IOAA Problema 1 -->
+        <div class="glass-card">
+          <div class="card-top">
+            <span class="view-tag">IOAA 2019 • Problema 1</span>
+            <h3>Céu de Keszthely (Hungria)</h3>
+            <p>Céu à meia-noite CEST com Gama Cassiopeiae culminando no meridiano superior, 3 novas de 2ª magnitude e os 8 aglomerados de Messier.</p>
+          </div>
+          <div>
+            <a href="player.html?sim=ioaa2019_p1&v=real_sky" class="btn-pill">👓 ABRIR NO VR CARDBOARD</a>
+            <details class="solution-box">
+              <summary>📋 Ver Gabarito Oficial</summary>
+              <div class="solution-body">
+                <strong>Respostas Oficiais:</strong>
                 <ul>
-                  <li>Sirius (α CMa): Azimute ~82°</li>
-                  <li>Canopus (α Car): Azimute ~42°</li>
-                  <li>Toliman / Alpha Centauri (α Cen): Azimute ~331°</li>
+                  <li><strong>Novas:</strong> Pegasus, Cygnus e Auriga (com anéis).</li>
+                  <li><strong>Aglomerados:</strong> M2, M13, M15, M30, M56, M71, M72, M92.</li>
+                  <li><strong>Mês & LST:</strong> Outubro / LST = 01h 00m.</li>
                 </ul>
-              </li>
-              <li><strong>2.4. Cometa na Eclíptica:</strong> Cometa nº 2 (marcado em amarelo na linha Regulus - Spica).</li>
-              <li><strong>2.5. Poente de Mintaka (δ Ori):</strong> Se pondo no horizonte Oeste (nascida 12h antes no equador celeste).</li>
-            </ul>
+              </div>
+            </details>
           </div>
-        </details>
-      </div>
-    </div>
+        </div>
 
-    <!-- Simulação 3: IOAA 2019 Problema 3 -->
-    <div class="card">
-      <div>
-        <div class="card-tag">IOAA 2019 • Problema 3 (Céu Real)</div>
-        <h2>Observador na Lua: Eclipse Solar pela Terra</h2>
-        <p>Observador no equador lunar em Mare Fecunditatis (0°, 50° E) vendo a Terra ocultar centralmente o Sol a 40° de altitude a Oeste, com o planeta menor Juno próximo.</p>
-      </div>
-      <div>
-        <a href="player.html?sim=ioaa2019_p3&v=real_sky" class="btn-launch">
-          👓 ABRIR SIMULAÇÃO VR
-        </a>
-        <details>
-          <summary>📋 Ver Gabarito & Solução Oficial</summary>
-          <div class="sol-content">
-            <strong>Respostas Oficiais:</strong>
-            <ul>
-              <li><strong>3.1. Estação na Hungria:</strong> Outono (Sol em Virgem próximo ao equinócio de outono).</li>
-              <li><strong>3.2. Distância de Juno à Lua:</strong> ~599 milhões de km ($3\text{ UA} + 1\text{ UA} + d_{\text{Terra-Lua}} = 598,8\text{ milhões de km}$).</li>
-              <li><strong>3.3. Pôr do Sol e Pôr da Terra:</strong>
+        <!-- IOAA Problema 2 -->
+        <div class="glass-card">
+          <div class="card-top">
+            <span class="view-tag">IOAA Desafio • Problema 2</span>
+            <h3>Desafio: Descubra a Latitude</h3>
+            <p>Você está em um local desconhecido da Terra. Localize o polo celeste e meça sua altitude angular acima do horizonte para descobrir a latitude!</p>
+          </div>
+          <div>
+            <a href="player.html?sim=ioaa2019_p2&v=real_sky" class="btn-pill">👓 ABRIR DESAFIO VR</a>
+            <details class="solution-box">
+              <summary>👁️ Revelar Resposta Secreta</summary>
+              <div class="solution-body">
+                <strong>Gabarito do Desafio:</strong>
                 <ul>
-                  <li>Pôr do Sol: ~3,3 dias terrestres depois (Sol desce 12,2°/dia, 40°/12,2° ≈ 3,28 dias).</li>
-                  <li>Pôr da Terra: <strong>Nunca</strong> (rotação síncrona lunar, Terra suspensa permanentemente no céu).</li>
+                  <li><strong>Latitude:</strong> <strong>33° Sul</strong> (Cruzeiro do Sul aponta para o Polo Celeste Sul a 33° de altura).</li>
+                  <li><strong>Estrelas principais:</strong> Sirius (Az ~82°), Canopus (Az ~42°), Alpha Cen (Az ~331°).</li>
+                  <li><strong>Cometa na Eclíptica:</strong> Cometa nº 2 (entre Regulus e Spica).</li>
                 </ul>
-              </li>
-              <li><strong>3.4. Coordenadas Selenográficas:</strong> Lat 0°, Long 50° E — <em>Mare Fecunditatis</em> (Mar da Fecundidade).</li>
-              <li><strong>3.5. Distância ao Pouso da Apollo 11:</strong> ~804 km.</li>
-            </ul>
+              </div>
+            </details>
           </div>
-        </details>
-      </div>
-    </div>
+        </div>
 
-    <!-- Simulação 4: Quando o segundo Sol chegar -->
-    <div class="card">
-      <div>
-        <div class="card-tag">Problema Clássico • Binário</div>
-        <h2>Quando o segundo Sol chegar...</h2>
-        <p>Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.</p>
+        <!-- IOAA Problema 3 -->
+        <div class="glass-card">
+          <div class="card-top">
+            <span class="view-tag">IOAA 2019 • Problema 3</span>
+            <h3>Observador na Lua: Eclipse Solar</h3>
+            <p>Equador lunar em Mare Fecunditatis (0°, 50° E) vendo a Terra eclipsar o Sol a 40° de altitude a Oeste com o anel atmosférico avermelhado.</p>
+          </div>
+          <div>
+            <a href="player.html?sim=ioaa2019_p3&v=real_sky" class="btn-pill">👓 ABRIR NO VR CARDBOARD</a>
+            <details class="solution-box">
+              <summary>📋 Ver Gabarito Oficial</summary>
+              <div class="solution-body">
+                <strong>Respostas Oficiais:</strong>
+                <ul>
+                  <li><strong>Estação na Terra:</strong> Outono (Sol em Virgem).</li>
+                  <li><strong>Distância de Juno:</strong> ~599 milhões de km ($3\text{ UA} + 1\text{ UA}$).</li>
+                  <li><strong>Pôr do Sol vs Pôr da Terra:</strong> Sol se põe em ~3,3 dias; Terra <strong>nunca se põe</strong> (rotação síncrona).</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- Binário Clássico -->
+        <div class="glass-card">
+          <div class="card-top">
+            <span class="view-tag">Problema Clássico • Binário</span>
+            <h3>Quando o segundo Sol chegar...</h3>
+            <p>Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II) orbitando o Centro de Massa contra o fundo de estrelas reais.</p>
+          </div>
+          <div>
+            <a href="player.html?sim=quando_o_segundo_sol_chegar&v=real_sky" class="btn-pill">👓 ABRIR NO VR CARDBOARD</a>
+          </div>
+        </div>
       </div>
-      <div>
-        <a href="player.html?sim=quando_o_segundo_sol_chegar&v=real_sky" class="btn-launch">
-          👓 ABRIR SIMULAÇÃO VR
-        </a>
+    </section>
+
+    <!-- 2. ESPAÇO: MINHAS SIMULAÇÕES -->
+    <section id="space-my-sims" class="view-section">
+      <div class="view-header">
+        <div class="view-tag">Laboratório Pessoal</div>
+        <h2>Minhas Simulações Salvas</h2>
+        <p>Simulações criadas por você no Maker Studio, salvas diretamente no navegador.</p>
       </div>
-    </div>
+
+      <div id="my-sims-grid" class="card-grid">
+        <!-- Inserido dinamicamente via JS -->
+      </div>
+      <div id="no-my-sims" style="text-align: center; padding: 60px 20px; color: var(--text-muted); display: none;">
+        <div style="font-size: 40px; margin-bottom: 12px;">🔭</div>
+        <p style="font-size: 15px; margin-bottom: 18px;">Você ainda não criou nenhuma simulação personalizada.</p>
+        <button onclick="switchSpace('maker')" class="btn-pill" style="width: auto; padding: 10px 24px;">🛠️ Abrir Maker Studio</button>
+      </div>
+    </section>
+
+    <!-- 3. ESPAÇO: SIMULATION MAKER STUDIO -->
+    <section id="space-maker" class="view-section">
+      <div class="view-header">
+        <div class="view-tag">Laboratório de Criação</div>
+        <h2>Simulation Maker Studio</h2>
+        <p>Crie suas próprias questões e desafios de planetário com estrelas reais, coordenadas customizadas, cometas, novas e eclipses.</p>
+      </div>
+
+      <div class="maker-layout">
+        <!-- Formulário de Criação -->
+        <div class="maker-form">
+          <div class="form-group">
+            <label>Título da Simulação</label>
+            <input type="text" id="maker-title" placeholder="Ex: Desafio no Polo Sul / Trânsito Planetário" value="Desafio de Planetário Personalizado">
+          </div>
+
+          <div class="form-group">
+            <label>
+              <span>Latitude do Observador (&phi;):</span>
+              <span id="maker-lat-val" class="val">-23.5° (Trópico de Capricórnio)</span>
+            </label>
+            <input type="range" id="maker-lat" min="-90" max="90" value="-23.5" step="0.5">
+            <div class="preset-chips">
+              <span class="chip" onclick="setMakerLat(90, 'Polo Norte (+90°)')">Polo Norte</span>
+              <span class="chip" onclick="setMakerLat(46.77, 'Keszthely (+46.8°)')">Keszthely</span>
+              <span class="chip" onclick="setMakerLat(0, 'Equador (0°)')">Equador</span>
+              <span class="chip" onclick="setMakerLat(-23.55, 'São Paulo (-23.5°)')">São Paulo</span>
+              <span class="chip" onclick="setMakerLat(-33.0, 'Santiago/Sydney (-33°)')">Lat -33°</span>
+              <span class="chip" onclick="setMakerLat(-90, 'Polo Sul (-90°)')">Polo Sul</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <span>Tempo Sideral Local (LST):</span>
+              <span id="maker-lst-val" class="val">12h 00m</span>
+            </label>
+            <input type="range" id="maker-lst" min="0" max="24" value="12" step="0.25">
+          </div>
+
+          <!-- Controle de Poluição Luminosa / Escala de Bortle -->
+          <div class="form-group">
+            <label>
+              <span>Poluição Luminosa (Escala de Bortle):</span>
+              <span id="maker-bortle-val" class="val">Classe 2 (Céu Escuro Rural • mag 6.0)</span>
+            </label>
+            <input type="range" id="maker-bortle" min="1" max="9" value="2" step="1">
+            <div class="bortle-scale-bar"></div>
+            <div style="display: flex; justify-content: space-between; font-size: 10.5px; color: var(--text-muted); margin-top: 4px;">
+              <span>1: Céu Primitivo (mag 6.5)</span>
+              <span>5: Suburbano (mag 4.5)</span>
+              <span>9: Metrópole (mag 2.0)</span>
+            </div>
+          </div>
+
+          <!-- Alvos Celestes Extras -->
+          <div class="form-group">
+            <label>Adicionar Alvo Especial de Desafio</label>
+            <select id="maker-target-type">
+              <option value="none">Nenhum (Apenas o Céu Real Natural)</option>
+              <option value="nova">Nova Estelar (com anel indicador)</option>
+              <option value="comet">Cometa com Cauda</option>
+              <option value="eclipse">Eclipse Solar pela Terra/Lua</option>
+              <option value="meridian">Linha do Meridiano Local</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Enunciado do Problema</label>
+            <textarea id="maker-desc" rows="3" placeholder="Descreva o que o estudante deve observar e calcular...">Observe o céu em 360°, identifique o polo celeste visível e calcule a latitude geográfica aproximada do observador.</textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Gabarito & Solução Oficial (Oculto)</label>
+            <textarea id="maker-solution" rows="3" placeholder="Escreva a resposta e passo a passo...">Latitude: -23.5° Sul. O Polo Celeste Sul está a 23.5° de altitude no horizonte Sul.</textarea>
+          </div>
+
+          <button id="btn-save-maker" class="btn-pill" style="background: linear-gradient(135deg, #00f0ff, #7928ca); padding: 16px;">
+            💾 SALVAR EM "MINHAS SIMULAÇÕES"
+          </button>
+        </div>
+
+        <!-- Painel de Pré-visualização 3D ao Vivo -->
+        <div>
+          <div class="preview-box">
+            <div class="preview-badge">PRÉ-VISUALIZAÇÃO 3D AO VIVO</div>
+            <canvas id="three-preview-canvas"></canvas>
+            <div class="preview-controls">
+              <span id="preview-star-count" class="preview-stat">Estrelas: ~4.200</span>
+              <span class="preview-stat">Arraste para girar 360°</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 18px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 18px;">
+            <h4 style="font-size: 14px; color: #fff; margin-bottom: 8px;">🚀 Teste Imediato</h4>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">Você pode abrir essa configuração diretamente no óculos VR Cardboard agora mesmo.</p>
+            <button id="btn-test-vr-instant" class="btn-pill" style="background: rgba(0, 240, 255, 0.15); border: 1px solid var(--accent); color: #fff;">
+              👓 TESTAR AGORA NO CARDBOARD
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ESPAÇO: CONFIGURAÇÕES & CALIBRAÇÃO -->
+    <section id="space-settings" class="view-section">
+      <div class="view-header">
+        <div class="view-tag">Ajustes Globais</div>
+        <h2>Configurações de Realidade Virtual</h2>
+        <p>Ajuste a convergência ótica das lentes do Cardboard e a poluição luminosa global.</p>
+      </div>
+
+      <div class="card-grid">
+        <div class="glass-card">
+          <div class="card-top">
+            <h3>Convergência das Lentes (IPD)</h3>
+            <p>Alinhe as duas metades da tela para fundir o meridiano e as estrelas em um único foco sem duplicidade.</p>
+            <label style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; color: var(--accent);">
+              <span>Deslocamento:</span>
+              <span id="set-shift-val">50 px</span>
+            </label>
+            <input type="range" id="set-shift" min="0" max="100" value="50" step="2">
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+              <button class="chip" onclick="adjShift(-4)">◀ Unir Linhas</button>
+              <button class="chip" onclick="adjShift(4)">Separar Linhas ▶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-top">
+            <h3>Tamanho da Abertura das Lentes</h3>
+            <p>Ajuste o diâmetro da máscara circular para casar com a largura física das lentes do seu óculos.</p>
+            <label style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; color: var(--accent);">
+              <span>Abertura:</span>
+              <span id="set-size-val">86 %</span>
+            </label>
+            <input type="range" id="set-size" min="60" max="96" value="86" step="2">
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-top">
+            <h3>Poluição Luminosa Padrão</h3>
+            <p>Selecione a quantidade padrão de estrelas visíveis no céu para todas as simulações.</p>
+            <label style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; color: var(--accent);">
+              <span>Nível Bortle:</span>
+              <span id="set-bortle-val">Classe 2 (Céu Rural • mag 6.0)</span>
+            </label>
+            <input type="range" id="set-bortle" min="1" max="9" value="2" step="1">
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <div class="section-divider">Configurações do Dispositivo</div>
-
-  <!-- 2. ABA DE CONFIGURAÇÕES E CALIBRAÇÃO -->
-  <section class="settings-section">
-    <div class="settings-header">
-      <h2>⚙️ Configurações & Calibração do Cardboard</h2>
-      <span style="font-size: 13px; color: #00f0ff;">Salvo automaticamente no seu celular ✅</span>
-    </div>
-
-    <div class="settings-grid">
-      <div class="control-box">
-        <label>
-          <span>Convergência das Lentes:</span>
-          <span id="shift-label">50 px</span>
-        </label>
-        <input type="range" id="shift-slider" min="0" max="100" value="50" step="2">
-        <div class="control-buttons">
-          <button id="btn-shift-in" class="btn-calib">◀ Unir Linhas</button>
-          <button id="btn-shift-out" class="btn-calib">Separar Linhas ▶</button>
-        </div>
-      </div>
-
-      <div class="control-box">
-        <label>
-          <span>Tamanho da Abertura:</span>
-          <span id="size-label">86 %</span>
-        </label>
-        <input type="range" id="size-slider" min="60" max="96" value="86" step="2">
-        <div class="control-buttons">
-          <button id="btn-size-dec" class="btn-calib">Diminuir Lente -</button>
-          <button id="btn-size-inc" class="btn-calib">Aumentar Lente +</button>
-        </div>
-      </div>
-    </div>
-
-    <div style="font-size: 13px; color: #9ca3af; margin-bottom: 8px;">Pré-visualização do Foco Óptico:</div>
-    <div class="test-viewer">
-      <div class="test-divider"></div>
-      <div class="test-half">
-        <div id="test-lens-l" class="test-lens-cutout">
-          <div class="test-line"></div>
-          <div class="test-target"></div>
-        </div>
-      </div>
-      <div class="test-half">
-        <div id="test-lens-r" class="test-lens-cutout">
-          <div class="test-line"></div>
-          <div class="test-target"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    Desenvolvido com Antigravity • Renderização Blender 360° com Catálogo Estelar Real HYG & Three.js WebXR
-  </footer>
-
+  <!-- LÓGICA DE APLICAÇÃO E ENGINE INTERATIVA THREE.JS -->
   <script>
-    let shiftVal = parseInt(localStorage.getItem('cardboard_shift') || '50');
-    let sizeVal = parseInt(localStorage.getItem('cardboard_size') || '86');
+    // 1. Navegação de Espaços (Sidebar Estilo Arc)
+    function switchSpace(spaceId) {
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('data-space') === spaceId);
+      });
+      document.querySelectorAll('.view-section').forEach(el => {
+        el.classList.remove('active');
+      });
+      const activeSec = document.getElementById(`space-${spaceId}`);
+      if (activeSec) activeSec.classList.add('active');
 
-    const shiftSlider = document.getElementById('shift-slider');
-    const shiftLabel = document.getElementById('shift-label');
-    const sizeSlider = document.getElementById('size-slider');
-    const sizeLabel = document.getElementById('size-label');
-
-    const btnShiftIn = document.getElementById('btn-shift-in');
-    const btnShiftOut = document.getElementById('btn-shift-out');
-    const btnSizeDec = document.getElementById('btn-size-dec');
-    const btnSizeInc = document.getElementById('btn-size-inc');
-
-    const testLensL = document.getElementById('test-lens-l');
-    const testLensR = document.getElementById('test-lens-r');
-
-    function updateCalibration() {
-      shiftLabel.textContent = shiftVal + ' px';
-      shiftSlider.value = shiftVal;
-      sizeLabel.textContent = sizeVal + ' %';
-      sizeSlider.value = sizeVal;
-
-      localStorage.setItem('cardboard_shift', shiftVal);
-      localStorage.setItem('cardboard_size', sizeVal);
-
-      const pxOffset = (shiftVal / 100) * 22;
-      testLensL.style.transform = `translateX(${pxOffset}px) scale(${sizeVal / 86})`;
-      testLensR.style.transform = `translateX(-${pxOffset}px) scale(${sizeVal / 86})`;
+      if (spaceId === 'my-sims') renderMySims();
+      if (spaceId === 'maker') updateMakerPreview();
     }
 
-    shiftSlider.addEventListener('input', (e) => {
-      shiftVal = parseInt(e.target.value);
-      updateCalibration();
+    // Toggle Sidebar
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
     });
 
-    sizeSlider.addEventListener('input', (e) => {
-      sizeVal = parseInt(e.target.value);
-      updateCalibration();
+    // 2. Armazenamento e Gerenciamento de "Minhas Simulações"
+    function getMySims() {
+      try {
+        return JSON.parse(localStorage.getItem('my_planetarium_sims') || '[]');
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function saveMySims(sims) {
+      localStorage.setItem('my_planetarium_sims', JSON.stringify(sims));
+      updateMySimsBadge();
+    }
+
+    function updateMySimsBadge() {
+      const count = getMySims().length;
+      document.getElementById('my-sims-badge').textContent = count;
+    }
+
+    function renderMySims() {
+      const grid = document.getElementById('my-sims-grid');
+      const emptyBox = document.getElementById('no-my-sims');
+      const sims = getMySims();
+
+      grid.innerHTML = '';
+      if (sims.length === 0) {
+        emptyBox.style.display = 'block';
+        return;
+      }
+      emptyBox.style.display = 'none';
+
+      sims.forEach((sim, idx) => {
+        const card = document.createElement('div');
+        card.className = 'glass-card';
+        card.innerHTML = `
+          <div class="card-top">
+            <span class="view-tag">SIMULAÇÃO PERSONALIZADA • LAT ${sim.lat}°</span>
+            <h3>${sim.title}</h3>
+            <p>${sim.desc}</p>
+          </div>
+          <div>
+            <a href="player.html?custom_id=${sim.id}&lat=${sim.lat}&lst=${sim.lst}&bortle=${sim.bortle}&target=${sim.target}" class="btn-pill" style="margin-bottom: 8px;">
+              👓 ABRIR NO VR CARDBOARD
+            </a>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="deleteSim(${idx})" class="chip" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3); flex: 1; text-align: center;">🗑️ Excluir</button>
+            </div>
+            ${sim.solution ? `
+              <details class="solution-box" style="margin-top: 8px;">
+                <summary>👁️ Ver Gabarito</summary>
+                <div class="solution-body">${sim.solution}</div>
+              </details>
+            ` : ''}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function deleteSim(idx) {
+      const sims = getMySims();
+      sims.splice(idx, 1);
+      saveMySims(sims);
+      renderMySims();
+    }
+
+    // 3. Maker Studio - Sliders & Controles
+    const makerLat = document.getElementById('maker-lat');
+    const makerLatVal = document.getElementById('maker-lat-val');
+    const makerLst = document.getElementById('maker-lst');
+    const makerLstVal = document.getElementById('maker-lst-val');
+    const makerBortle = document.getElementById('maker-bortle');
+    const makerBortleVal = document.getElementById('maker-bortle-val');
+    const makerTarget = document.getElementById('maker-target-type');
+
+    const bortleNames = {
+      1: "Classe 1 (Céu Primitivo Puro • mag 6.5)",
+      2: "Classe 2 (Céu Escuro Rural • mag 6.0)",
+      3: "Classe 3 (Céu Rural • mag 5.5)",
+      4: "Classe 4 (Transição Suburbana • mag 5.0)",
+      5: "Classe 5 (Céu Suburbano • mag 4.5)",
+      6: "Classe 6 (Suburbano Brilhante • mag 4.0)",
+      7: "Classe 7 (Transição Urbana • mag 3.5)",
+      8: "Classe 8 (Céu Urbano / Metrópole • mag 2.8)",
+      9: "Classe 9 (Centro Metropolitano • mag 2.0)"
+    };
+
+    function setMakerLat(lat, label) {
+      makerLat.value = lat;
+      makerLatVal.textContent = `${lat}° (${label})`;
+      updateMakerPreview();
+    }
+
+    makerLat.addEventListener('input', (e) => {
+      makerLatVal.textContent = `${e.target.value}°`;
+      updateMakerPreview();
     });
 
-    btnShiftIn.addEventListener('click', () => {
-      shiftVal = Math.min(100, shiftVal + 4);
-      updateCalibration();
+    makerLst.addEventListener('input', (e) => {
+      const hours = Math.floor(e.target.value);
+      const mins = Math.round((e.target.value - hours) * 60);
+      makerLstVal.textContent = `${hours.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m`;
+      updateMakerPreview();
     });
 
-    btnShiftOut.addEventListener('click', () => {
-      shiftVal = Math.max(0, shiftVal - 4);
-      updateCalibration();
+    makerBortle.addEventListener('input', (e) => {
+      makerBortleVal.textContent = bortleNames[e.target.value] || `Classe ${e.target.value}`;
+      updateMakerPreview();
     });
 
-    btnSizeDec.addEventListener('click', () => {
-      sizeVal = Math.max(60, sizeVal - 4);
-      updateCalibration();
+    makerTarget.addEventListener('change', () => {
+      updateMakerPreview();
     });
 
-    btnSizeInc.addEventListener('click', () => {
-      sizeVal = Math.min(96, sizeVal + 4);
-      updateCalibration();
+    // Salvar Simulação Criada
+    document.getElementById('btn-save-maker').addEventListener('click', () => {
+      const title = document.getElementById('maker-title').value || "Simulação de Planetário";
+      const desc = document.getElementById('maker-desc').value;
+      const solution = document.getElementById('maker-solution').value;
+      const lat = parseFloat(makerLat.value);
+      const lst = parseFloat(makerLst.value);
+      const bortle = parseInt(makerBortle.value);
+      const target = makerTarget.value;
+
+      const newSim = {
+        id: 'sim_' + Date.now(),
+        title,
+        desc,
+        solution,
+        lat,
+        lst,
+        bortle,
+        target,
+        createdAt: new Date().toISOString()
+      };
+
+      const sims = getMySims();
+      sims.unshift(newSim);
+      saveMySims(sims);
+
+      alert(`✅ Simulação "${title}" salva com sucesso em "Minhas Simulações"!`);
+      switchSpace('my-sims');
     });
 
-    updateCalibration();
+    // Testar Imediatamente no Cardboard
+    document.getElementById('btn-test-vr-instant').addEventListener('click', () => {
+      const lat = parseFloat(makerLat.value);
+      const lst = parseFloat(makerLst.value);
+      const bortle = parseInt(makerBortle.value);
+      const target = makerTarget.value;
+      window.location.href = `player.html?sim=custom&lat=${lat}&lst=${lst}&bortle=${bortle}&target=${target}`;
+    });
+
+    // 4. Live 3D Celestial Preview (Three.js no Canvas)
+    let pRenderer, pScene, pCamera, pStarsGroup;
+    function initMakerPreview() {
+      const canvas = document.getElementById('three-preview-canvas');
+      const box = canvas.parentElement;
+      
+      pScene = new THREE.Scene();
+      pCamera = new THREE.PerspectiveCamera(65, box.clientWidth / box.clientHeight, 0.1, 1000);
+      pCamera.position.set(0, 0, 0.1);
+
+      pRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      pRenderer.setSize(box.clientWidth, box.clientHeight);
+      pRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      pStarsGroup = new THREE.Group();
+      pScene.add(pStarsGroup);
+
+      // Controle de rotação com mouse / toque
+      let isDragging = false, prevX = 0, prevY = 0, lon = 0, lat = 0;
+      canvas.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+      window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        lon += (e.clientX - prevX) * 0.3;
+        lat += (e.clientY - prevY) * 0.3;
+        lat = Math.max(-85, Math.min(85, lat));
+        prevX = e.clientX; prevY = e.clientY;
+        const phi = THREE.MathUtils.degToRad(90 - lat);
+        const theta = THREE.MathUtils.degToRad(lon);
+        pCamera.lookAt(500 * Math.sin(phi) * Math.cos(theta), 500 * Math.cos(phi), 500 * Math.sin(phi) * Math.sin(theta));
+      });
+
+      // Animação contínua
+      function animate() {
+        requestAnimationFrame(animate);
+        pRenderer.render(pScene, pCamera);
+      }
+      animate();
+      updateMakerPreview();
+    }
+
+    function updateMakerPreview() {
+      if (!pStarsGroup) return;
+      while(pStarsGroup.children.length > 0) { 
+        pStarsGroup.remove(pStarsGroup.children[0]); 
+      }
+
+      const lat = parseFloat(makerLat.value);
+      const lst = parseFloat(makerLst.value);
+      const bortle = parseInt(makerBortle.value);
+
+      // Magnitude limite pelo Bortle
+      const bortleMagLimits = { 1: 6.5, 2: 6.0, 3: 5.5, 4: 5.0, 5: 4.5, 6: 4.0, 7: 3.5, 8: 2.8, 9: 2.0 };
+      const mLim = bortleMagLimits[bortle] || 6.0;
+
+      // Gerar estrelas pseudo-reais projetadas astronomicamente
+      const starCount = Math.round(5000 * Math.pow(mLim / 6.5, 2.5));
+      document.getElementById('preview-star-count').textContent = `Estrelas: ~${starCount}`;
+
+      const geometry = new THREE.BufferGeometry();
+      const positions = [];
+      const colors = [];
+      const sizes = [];
+
+      const latRad = THREE.MathUtils.degToRad(lat);
+      const lstRad = THREE.MathUtils.degToRad(lst * 15);
+
+      // Distribuição estelar esférica
+      for (let i = 0; i < starCount; i++) {
+        // Coordenadas equatoriais
+        const dec = (Math.random() - 0.5) * Math.PI;
+        const ra = Math.random() * 2 * Math.PI;
+        const mag = Math.random() * mLim;
+
+        // Horizonal (Alt, Az)
+        const H = lstRad - ra;
+        const sinAlt = Math.sin(latRad) * Math.sin(dec) + Math.cos(latRad) * Math.cos(dec) * Math.cos(H);
+        const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+
+        if (alt > 0) {
+          const y = -Math.cos(dec) * Math.sin(H);
+          const x = Math.sin(dec) * Math.cos(latRad) - Math.cos(dec) * Math.sin(latRad) * Math.cos(H);
+          const az = Math.atan2(y, x);
+
+          const r = 200;
+          positions.push(r * Math.cos(alt) * Math.sin(az), r * Math.sin(alt), r * Math.cos(alt) * Math.cos(az));
+
+          // Cor espectral aleatória coerente
+          const tempType = Math.random();
+          if (tempType > 0.8) colors.push(0.7, 0.85, 1.0); // Azul
+          else if (tempType > 0.4) colors.push(1.0, 1.0, 0.95); // Branco
+          else if (tempType > 0.15) colors.push(1.0, 0.8, 0.4); // Laranja
+          else colors.push(1.0, 0.4, 0.3); // Vermelho
+        }
+      }
+
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+      const pMaterial = new THREE.PointsMaterial({
+        size: 2.5,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.95
+      });
+
+      const starPoints = new THREE.Points(geometry, pMaterial);
+      pStarsGroup.add(starPoints);
+
+      // Linha do Horizonte
+      const horizonGeo = new THREE.RingGeometry(190, 195, 64);
+      const horizonMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, opacity: 0.2, transparent: true });
+      const horizon = new THREE.Mesh(horizonGeo, horizonMat);
+      horizon.rotation.x = Math.PI / 2;
+      pStarsGroup.add(horizon);
+    }
+
+    // 5. Configurações Globais
+    let setShiftVal = parseInt(localStorage.getItem('cardboard_shift') || '50');
+    let setSizeVal = parseInt(localStorage.getItem('cardboard_size') || '86');
+    let setBortleVal = parseInt(localStorage.getItem('global_bortle') || '2');
+
+    const setShift = document.getElementById('set-shift');
+    const setShiftLabel = document.getElementById('set-shift-val');
+    const setSize = document.getElementById('set-size');
+    const setSizeLabel = document.getElementById('set-size-val');
+    const setBortle = document.getElementById('set-bortle');
+    const setBortleLabel = document.getElementById('set-bortle-val');
+
+    function updateSettings() {
+      setShiftLabel.textContent = setShiftVal + ' px';
+      setShift.value = setShiftVal;
+      setSizeLabel.textContent = setSizeVal + ' %';
+      setSize.value = setSizeVal;
+      setBortleLabel.textContent = bortleNames[setBortleVal] || `Classe ${setBortleVal}`;
+      setBortle.value = setBortleVal;
+
+      localStorage.setItem('cardboard_shift', setShiftVal);
+      localStorage.setItem('cardboard_size', setSizeVal);
+      localStorage.setItem('global_bortle', setBortleVal);
+    }
+
+    function adjShift(d) {
+      setShiftVal = Math.max(0, Math.min(100, setShiftVal + d));
+      updateSettings();
+    }
+
+    setShift.addEventListener('input', e => { setShiftVal = parseInt(e.target.value); updateSettings(); });
+    setSize.addEventListener('input', e => { setSizeVal = parseInt(e.target.value); updateSettings(); });
+    setBortle.addEventListener('input', e => { setBortleVal = parseInt(e.target.value); updateSettings(); });
+
+    // Inicialização
+    window.addEventListener('DOMContentLoaded', () => {
+      updateSettings();
+      updateMySimsBadge();
+      initMakerPreview();
+    });
   </script>
 </body>
 </html>
