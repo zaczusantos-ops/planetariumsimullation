@@ -4,647 +4,322 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>AstroVR • Planetário Stellarium 360°</title>
+  <title>AstroVR Planetario 360</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      overflow: hidden;
-      background-color: #010206;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
-      width: 100vw;
-      height: 100vh;
-    }
-    #container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-    }
-
-    /* Tela Inicial / Overlay */
+    body { overflow: hidden; background: #010206; font-family: sans-serif; user-select: none; width: 100vw; height: 100vh; }
+    #container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
     #ui-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: rgba(4, 7, 14, 0.95);
-      backdrop-filter: blur(16px);
-      color: white;
-      z-index: 999;
-      text-align: center;
-      padding: 24px;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      background: rgba(4,7,14,0.95); backdrop-filter: blur(16px);
+      color: white; z-index: 999; text-align: center; padding: 24px;
     }
-    h1 {
-      font-size: 22px;
-      margin-bottom: 8px;
-      color: #00f0ff;
-    }
-    p {
-      font-size: 14px;
-      max-width: 480px;
-      line-height: 1.5;
-      color: #cbd5e1;
-      margin-bottom: 24px;
-    }
-    .badge {
-      background: rgba(0, 240, 255, 0.15);
-      border: 1px solid #00f0ff;
-      color: #00f0ff;
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 14px;
-      letter-spacing: 0.5px;
-    }
-    .btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-      max-width: 320px;
-      margin-bottom: 20px;
-    }
-    .btn {
-      background: linear-gradient(135deg, #00d2ff, #0066ff);
-      color: white;
-      border: none;
-      padding: 15px 24px;
-      font-size: 15px;
-      font-weight: 700;
-      border-radius: 50px;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0, 150, 255, 0.4);
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn:active { transform: scale(0.97); }
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: none;
-      color: #e2e8f0;
-    }
-    .btn-back {
-      color: #94a3b8;
-      font-size: 13px;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .btn-back:hover { color: #fff; }
-
-    /* Barra Superior */
-    .top-bar {
-      position: absolute;
-      top: 14px;
-      left: 14px;
-      right: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 1000;
-      pointer-events: none;
-    }
-    .top-bar button, .top-bar a {
-      pointer-events: auto;
-      background: rgba(10, 15, 25, 0.85);
-      border: 1px solid rgba(0, 240, 255, 0.35);
-      color: #00f0ff;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-    }
-
-    /* Moldura das Lentes Cardboard */
-    .eye-frame {
-      position: absolute;
-      top: 0;
-      width: 50vw;
-      height: 100vh;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      z-index: 10;
-      overflow: hidden;
-    }
-    #left-eye-frame { left: 0; }
-    #right-eye-frame { right: 0; }
-
-    .lens-mask {
-      border: 2px solid rgba(0, 240, 255, 0.5);
-      border-radius: 32px;
-      box-shadow: 0 0 0 2000px #000;
-      position: relative;
-    }
-    
-    .divider {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      width: 2px;
-      height: 100%;
-      background: #222;
-      transform: translateX(-50%);
-      z-index: 20;
-      display: none;
-    }
+    h1 { font-size: 22px; margin-bottom: 8px; color: #00f0ff; }
+    p { font-size: 14px; max-width: 480px; line-height: 1.5; color: #cbd5e1; margin-bottom: 24px; }
+    .badge { background: rgba(0,240,255,0.15); border: 1px solid #00f0ff; color: #00f0ff; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 14px; }
+    .btn-group { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; margin-bottom: 20px; }
+    .btn { background: linear-gradient(135deg, #00d2ff, #0066ff); color: white; border: none; padding: 15px 24px; font-size: 15px; font-weight: 700; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 20px rgba(0,150,255,0.4); }
+    .btn-secondary { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); box-shadow: none; color: #e2e8f0; }
+    .btn-back { color: #94a3b8; font-size: 13px; text-decoration: none; }
+    .top-bar { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; pointer-events: none; }
+    .top-bar button, .top-bar a { pointer-events: auto; background: rgba(10,15,25,0.85); border: 1px solid rgba(0,240,255,0.35); color: #00f0ff; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; text-decoration: none; cursor: pointer; }
+    .eye-frame { position: absolute; top: 0; width: 50vw; height: 100vh; display: none; align-items: center; justify-content: center; pointer-events: none; z-index: 10; overflow: hidden; }
+    #left-eye-frame { left: 0; } #right-eye-frame { right: 0; }
+    .lens-mask { border: 2px solid rgba(0,240,255,0.5); border-radius: 32px; box-shadow: 0 0 0 2000px #000; position: relative; }
+    .divider { position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: #222; transform: translateX(-50%); z-index: 20; display: none; }
   </style>
-  <!-- Three.js e Catálogo Síncrono do Stellarium -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="data/stellarium_catalog.js?v=2.7"></script>
+  <script src="data/stellarium_catalog.js?v=2.9"></script>
 </head>
 <body>
-
-  <!-- Barra Superior -->
-  <div class="top-bar" id="top-bar" style="display: none;">
-    <a href="index.html">← Sair do Planetário</a>
-    <button id="toggle-vr-btn">👓 Alternar Modo VR</button>
+  <div class="top-bar" id="top-bar" style="display:none;">
+    <a href="index.html">&larr; Voltar</a>
+    <button id="toggle-vr-btn">Alternar VR</button>
   </div>
-
-  <!-- Tela de Início / Overlay -->
   <div id="ui-overlay">
-    <div id="sim-badge" class="badge">🪐 CÉU OFICIAL DO STELLARIUM (8.870 ESTRELAS)</div>
-    <h1 id="sim-title">Planetário Astronômico 360°</h1>
-    <p id="sim-desc">
-      Explore o domo celeste em 360°. Para usar com óculos VR Cardboard, clique no botão azul e vire o smartphone na horizontal.
-    </p>
+    <div id="sim-badge" class="badge">Stellarium 8870 Stars</div>
+    <h1 id="sim-title">Planetario 360</h1>
+    <p id="sim-desc">Clique para iniciar</p>
     <div class="btn-group">
-      <button class="btn" id="start-vr-btn">👓 ENTRAR NO MODO VR CARDBOARD</button>
-      <button class="btn btn-secondary" id="start-mono-btn">📱 MODO TELA CHEIA (360° LIVRE)</button>
+      <button class="btn" id="start-vr-btn">VR CARDBOARD</button>
+      <button class="btn btn-secondary" id="start-mono-btn">TELA CHEIA 360</button>
     </div>
-    <a class="btn-back" href="index.html">← Voltar ao Catálogo de Simulações</a>
+    <a class="btn-back" href="index.html">&larr; Voltar ao catalogo</a>
   </div>
-
   <div id="divider-line" class="divider"></div>
-
-  <!-- Lentes Cardboard -->
-  <div id="left-eye-frame" class="eye-frame">
-    <div id="lens-left" class="lens-mask"></div>
-  </div>
-  <div id="right-eye-frame" class="eye-frame">
-    <div id="lens-right" class="lens-mask"></div>
-  </div>
-
+  <div id="left-eye-frame" class="eye-frame"><div id="lens-left" class="lens-mask"></div></div>
+  <div id="right-eye-frame" class="eye-frame"><div id="lens-right" class="lens-mask"></div></div>
   <div id="container"></div>
 
   <script>
-    // 1. Catálogo Oficial de Cada Simulação (Configurações Individuais Exatas)
-    const SIM_DATABASE = {
-      'ioaa2019_p1': {
-        title: 'IOAA 2019 • Problema 1: Céu de Keszthely',
-        badge: '🇭🇺 IOAA 2019 • HUNGARY ROUND 1',
-        desc: 'Céu à meia-noite em Keszthely (+46.8° N, LST = 01h 00m) com γ Cassiopeiae no meridiano superior, 3 novas de 2ª magnitude e os 8 aglomerados de Messier.',
-        lat: 46.77,
-        lst: 1.0,
-        bortle: 2,
-        sceneType: 'p1_keszthely'
+    /* jshint esversion: 5 */
+    // ---- SIM DATABASE ----
+    var SIM_DB = {
+      ioaa2019_p1: {
+        title: "IOAA 2019 Problema 1: Keszthely", badge: "IOAA 2019 Hungary",
+        desc: "Ceu a meia-noite em Keszthely +46.8 N LST 1h",
+        lat: 46.77, lst: 1.0, bortle: 2, type: "keszthely"
       },
-      'ioaa2019_p2': {
-        title: 'IOAA • Desafio: Descubra a Latitude do Observador',
-        badge: '🧭 DESAFIO DE LATITUDE (CÉU REAL)',
-        desc: 'Localize o polo celeste visível e meça sua altitude angular acima do horizonte para descobrir a latitude e o hemisfério exatos deste local!',
-        lat: -33.0,
-        lst: 11.53,
-        bortle: 2,
-        sceneType: 'p2_latitude'
+      ioaa2019_p2: {
+        title: "IOAA Desafio: Descubra a Latitude", badge: "Desafio Latitude",
+        desc: "Localize o polo celeste e meca sua altitude",
+        lat: -33.0, lst: 11.53, bortle: 2, type: "latitude"
       },
-      'ioaa2019_p3': {
-        title: 'IOAA 2019 • Problema 3: Eclipse na Lua',
-        badge: '🌕 OBSERVADOR NA LUA • ECLIPSE POR TERRA',
-        desc: 'Observador em Mare Fecunditatis (0°, 50° E) vendo a Terra ocultar centralmente o Sol a 40° de altitude a Oeste com o anel atmosférico avermelhado.',
-        lat: 0.0,
-        lst: 14.67,
-        bortle: 1,
-        sceneType: 'p3_lunar'
+      ioaa2019_p3: {
+        title: "IOAA 2019 Problema 3: Eclipse na Lua", badge: "Observador Lunar",
+        desc: "Terra eclipsando o Sol visto da Lua",
+        lat: 0.0, lst: 14.67, bortle: 1, type: "lunar"
       },
-      'quando_o_segundo_sol_chegar': {
-        title: 'Quando o segundo Sol chegar...',
-        badge: '🪐 SISTEMA BINÁRIO SINCRONIZADO',
-        desc: 'Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.',
-        lat: 45.0,
-        lst: 0.0,
-        bortle: 2,
-        sceneType: 'binary_system'
+      quando_o_segundo_sol_chegar: {
+        title: "Quando o segundo Sol chegar", badge: "Sistema Binario",
+        desc: "Plo-I e Plo-II orbitam o centro de massa",
+        lat: 45.0, lst: 0.0, bortle: 2, type: "binary"
       }
     };
 
-    // Parâmetros da URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const simKey = urlParams.get('sim') || 'ioaa2019_p1';
-    const isCustom = simKey === 'custom' || urlParams.has('custom_id') || urlParams.has('lat');
-
-    let currentSim = SIM_DATABASE[simKey] || SIM_DATABASE['ioaa2019_p1'];
-
-    if (isCustom) {
-      const customLat = parseFloat(urlParams.get('lat') || '-23.5');
-      const customLst = parseFloat(urlParams.get('lst') || '12');
-      const customBortle = parseInt(urlParams.get('bortle') || '2');
-      const customTarget = urlParams.get('target') || 'none';
-
-      currentSim = {
-        title: 'Simulação Personalizada (Maker Studio)',
-        badge: `🧪 MAKER STUDIO • LAT ${customLat}° • CÉU STELLARIUM`,
-        desc: `Céu customizado: Latitude ${customLat}°, LST ${customLst}h.`,
-        lat: customLat,
-        lst: customLst,
-        bortle: customBortle,
-        sceneType: 'custom_maker',
-        customTarget: customTarget
+    var p = new URLSearchParams(window.location.search);
+    var key = p.get("sim") || "ioaa2019_p1";
+    var sim = SIM_DB[key] || SIM_DB["ioaa2019_p1"];
+    if (p.has("lat")) {
+      sim = {
+        title: "Maker Studio", badge: "Custom", desc: "Ceu customizado",
+        lat: parseFloat(p.get("lat") || "-23.5"),
+        lst: parseFloat(p.get("lst") || "12"),
+        bortle: parseInt(p.get("bortle") || "2"),
+        type: "custom",
+        target: p.get("target") || ""
       };
     }
 
-    document.getElementById('sim-title').textContent = currentSim.title;
-    document.getElementById('sim-badge').textContent = currentSim.badge;
-    document.getElementById('sim-desc').textContent = currentSim.desc;
+    document.getElementById("sim-title").textContent = sim.title;
+    document.getElementById("sim-badge").textContent = sim.badge;
+    document.getElementById("sim-desc").textContent  = sim.desc;
 
-    let scene, camera, renderer;
-    let isVR = false;
-    let hasOrientation = false;
-    let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
-    let screenOrientation = 0;
+    // ---- GLOBALS ----
+    var scene, camera, renderer;
+    var isVR = false;
+    var lat = 0, lon = 180, isInteracting = false;
+    var hasGyro = false;
+    var gyro = { a: 0, b: 0, g: 0 };
+    var screenOri = 0;
+    var EYE_SHIFT = 20;
+    var animCBs = [];
 
-    let eyeShiftPixels = parseInt(localStorage.getItem('cardboard_shift') || '50');
-    let lensSizePercent = parseInt(localStorage.getItem('cardboard_size') || '86');
-
-    const uiOverlay = document.getElementById('ui-overlay');
-    const topBar = document.getElementById('top-bar');
-    const startVRBtn = document.getElementById('start-vr-btn');
-    const startMonoBtn = document.getElementById('start-mono-btn');
-    const toggleVRBtn = document.getElementById('toggle-vr-btn');
-    const leftEyeFrame = document.getElementById('left-eye-frame');
-    const rightEyeFrame = document.getElementById('right-eye-frame');
-    const lensLeft = document.getElementById('lens-left');
-    const lensRight = document.getElementById('lens-right');
-    const dividerLine = document.getElementById('divider-line');
-
-    function applyCalibratedStyle() {
-      const sizeVal = `min(${lensSizePercent * 0.5}vw, ${lensSizePercent}vh)`;
-      lensLeft.style.width = sizeVal;
-      lensLeft.style.height = sizeVal;
-      lensRight.style.width = sizeVal;
-      lensRight.style.height = sizeVal;
+    // ---- STAR TEXTURE ----
+    function makeStarTexture() {
+      var c = document.createElement("canvas");
+      c.width = 64; c.height = 64;
+      var ctx = c.getContext("2d");
+      var grd = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grd.addColorStop(0,    "rgba(255,255,255,1)");
+      grd.addColorStop(0.3,  "rgba(255,255,255,0.8)");
+      grd.addColorStop(0.7,  "rgba(255,255,255,0.1)");
+      grd.addColorStop(1,    "rgba(255,255,255,0)");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, 64, 64);
+      var t = new THREE.CanvasTexture(c);
+      t.needsUpdate = true;
+      return t;
     }
 
-    // 2. Textura de Estrela Suave Perfeitamente Circular (Airy Disk)
-    function createStarGlowTexture() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
-
-      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-      grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
-      grad.addColorStop(0.15, 'rgba(255, 255, 255, 0.95)');
-      grad.addColorStop(0.40, 'rgba(255, 255, 255, 0.40)');
-      grad.addColorStop(0.75, 'rgba(255, 255, 255, 0.08)');
-      grad.addColorStop(1.0, 'rgba(255, 255, 255, 0.0)');
-
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 128, 128);
-
-      const tex = new THREE.CanvasTexture(canvas);
-      tex.needsUpdate = true;
-      return tex;
-    }
-
-    // 3. Montagem do Céu Real do Stellarium em 5 Camadas de Magnitude (Escala de Pogson)
-    function renderStellariumMultiTierStars(targetScene, latDeg, lstHours, bortleLevel) {
-      const stars = window.STELLARIUM_STARS || [];
-      if (!stars || stars.length === 0) {
-        console.warn("Catálogo Stellarium não encontrado na memória.");
-        return;
-      }
-
-      const bortleMagLimits = { 1: 6.5, 2: 6.0, 3: 5.5, 4: 5.0, 5: 4.5, 6: 4.0, 7: 3.5, 8: 2.8, 9: 2.0 };
-      const mLim = bortleMagLimits[bortleLevel] || 6.0;
-
-      const latRad = THREE.MathUtils.degToRad(latDeg);
-      const lstRad = THREE.MathUtils.degToRad(lstHours * 15);
-
-      // 5 Camadas de Brilho Físico
-      const tiers = [
-        { maxMag: 0.5, size: 28.0, positions: [], colors: [] },  // Tier 1: Sirius, Canopus, Rigel, Vega, Betelgeuse, Alpha Cen
-        { maxMag: 1.8, size: 18.0, positions: [], colors: [] },  // Tier 2: Três Marias, Crux, Pólux, Castor, Spica
-        { maxMag: 3.2, size: 11.0, positions: [], colors: [] },  // Tier 3: Estrelas de 2ª e 3ª magnitude
-        { maxMag: 4.8, size: 6.5,  positions: [], colors: [] },  // Tier 4: Estrelas fracas
-        { maxMag: 6.5, size: 3.8,  positions: [], colors: [] }   // Tier 5: Limite de visão a olho nu
+    // ---- RENDER STELLARIUM STARS ----
+    function buildStars(sc, obsLat, lst, bortle) {
+      if (typeof STELLARIUM_CATALOG === "undefined") { console.warn("No catalog"); return; }
+      var bf     = Math.max(0.3, 1.0 - (bortle - 1) * 0.08);
+      var latR   = THREE.MathUtils.degToRad(obsLat);
+      var maxMag = bortle <= 3 ? 9.5 : bortle <= 5 ? 8.0 : bortle <= 7 ? 6.5 : 5.5;
+      var R      = 500;
+      var tiers  = [
+        { max: 1.5,  sz: 9.0, pos: [], col: [] },
+        { max: 3.0,  sz: 5.5, pos: [], col: [] },
+        { max: 5.0,  sz: 3.5, pos: [], col: [] },
+        { max: 7.0,  sz: 2.2, pos: [], col: [] },
+        { max: 10.0, sz: 1.4, pos: [], col: [] }
       ];
 
-      stars.forEach(s => {
-        const raDeg = s[0];
-        const decDeg = s[1];
-        const mag = s[2];
-        const rVal = s[3], gVal = s[4], bVal = s[5];
+      for (var si = 0; si < STELLARIUM_CATALOG.length; si++) {
+        var s = STELLARIUM_CATALOG[si];
+        if (s.mag > maxMag) continue;
+        var raR  = THREE.MathUtils.degToRad(s.ra  * 15);
+        var decR = THREE.MathUtils.degToRad(s.dec);
+        var lstR = THREE.MathUtils.degToRad(lst   * 15);
+        var ha   = lstR - raR;
+        var sinA = Math.sin(latR) * Math.sin(decR) + Math.cos(latR) * Math.cos(decR) * Math.cos(ha);
+        sinA = Math.max(-1, Math.min(1, sinA));
+        var alt  = Math.asin(sinA);
+        if (alt < THREE.MathUtils.degToRad(-5)) continue;
+        var cosAlt = Math.cos(alt);
+        var cosAz  = cosAlt > 0.0001 ? (Math.sin(decR) - Math.sin(latR) * sinA) / (Math.cos(latR) * cosAlt) : 0;
+        cosAz = Math.max(-1, Math.min(1, cosAz));
+        var az = Math.acos(cosAz);
+        if (Math.sin(ha) > 0) az = 2 * Math.PI - az;
+        var px = R * cosAlt * Math.sin(az);
+        var py = R * sinA;
+        var pz = R * cosAlt * Math.cos(az);
 
-        if (mag <= mLim) {
-          const raRad = THREE.MathUtils.degToRad(raDeg);
-          const decRad = THREE.MathUtils.degToRad(decDeg);
+        var bv = (s.bv !== undefined && s.bv !== null) ? s.bv : 0.6;
+        var rv, gv, bv2;
+        if      (bv < -0.3) { rv=0.63; gv=0.71; bv2=1.0; }
+        else if (bv <  0.0) { rv=0.75; gv=0.85; bv2=1.0; }
+        else if (bv <  0.3) { rv=0.95; gv=0.97; bv2=1.0; }
+        else if (bv <  0.6) { rv=1.0;  gv=1.0;  bv2=0.95; }
+        else if (bv <  1.0) { rv=1.0;  gv=0.87; bv2=0.7; }
+        else if (bv <  1.4) { rv=1.0;  gv=0.70; bv2=0.4; }
+        else                { rv=1.0;  gv=0.55; bv2=0.25; }
 
-          const H = lstRad - raRad;
-          const sinAlt = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(H);
-          const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
-
-          if (alt > -0.01) {
-            const y = -Math.cos(decRad) * Math.sin(H);
-            const x = Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.sin(latRad) * Math.cos(H);
-            const az = Math.atan2(y, x);
-
-            const r = 400;
-            const px = r * Math.cos(alt) * Math.sin(az);
-            const py = r * Math.sin(alt);
-            const pz = r * Math.cos(alt) * Math.cos(az);
-
-            // Determinar em qual camada a estrela se encaixa
-            let targetTier = tiers[4];
-            for (let i = 0; i < tiers.length; i++) {
-              if (mag <= tiers[i].maxMag) {
-                targetTier = tiers[i];
-                break;
-              }
-            }
-
-            targetTier.positions.push(px, py, pz);
-
-            // Escala de brilho por Pogson
-            const intensity = Math.max(0.5, 1.4 * Math.pow(10.0, -0.16 * mag));
-            targetTier.colors.push(rVal * intensity, gVal * intensity, bVal * intensity);
-          }
+        var intensity = bf * Math.max(0.4, 1.5 * Math.pow(10, -0.16 * s.mag));
+        var tier = tiers[tiers.length - 1];
+        for (var ti = 0; ti < tiers.length; ti++) {
+          if (s.mag <= tiers[ti].max) { tier = tiers[ti]; break; }
         }
-      });
-
-      const starTexture = createStarGlowTexture();
-
-      // Criar a malha de pontos de cada camada
-      tiers.forEach(tier => {
-        if (tier.positions.length > 0) {
-          const geo = new THREE.BufferGeometry();
-          geo.setAttribute('position', new THREE.Float32BufferAttribute(tier.positions, 3));
-          geo.setAttribute('color', new THREE.Float32BufferAttribute(tier.colors, 3));
-
-          const mat = new THREE.PointsMaterial({
-            size: tier.size,
-            map: starTexture,
-            vertexColors: true,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-          });
-
-          const mesh = new THREE.Points(geo, mat);
-          targetScene.add(mesh);
-        }
-      });
-    }
-
-       // Global list of per‑frame animation callbacks — must be declared first
-    const animationCallbacks = [];
-
-    // --- CENÁRIOS INDIVIDUAIS ESPECÍFICOS DE CADA SIMULAÇÃO ---
-
-    // 1. IOAA Problema 1: Keszthely (Hungria, Outubro, Lat +46.8°, LST 01h 00m)
-    function buildSceneKeszthely(scene) {
-      // Arco do Meridiano Celeste Local (Norte → Zênite → Sul)
-      const linePts = [];
-      for (let a = 0; a <= Math.PI; a += 0.03) {
-        linePts.push(new THREE.Vector3(0, 390 * Math.sin(a), 390 * Math.cos(a)));
+        tier.pos.push(px, py, pz);
+        tier.col.push(rv * intensity, gv * intensity, bv2 * intensity);
       }
-      const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
-      const lineMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2, transparent: true, opacity: 0.6 });
-      
-      const meridianGroup = new THREE.Group();
-      meridianGroup.add(new THREE.Line(lineGeo, lineMat));
-      scene.add(meridianGroup);
-      // Rotação lenta para simular rotação da esfera celeste
-      animationCallbacks.push(() => { meridianGroup.rotation.y += 0.0004; });
 
-      // 3 Novas com anéis indicadores (Pegasus, Cygnus, Auriga)
-      const novaPositions = [
-        new THREE.Vector3(140, 270, -250),
-        new THREE.Vector3(-80, 310, -210),
-        new THREE.Vector3(260, 180, 200)
-      ];
-      novaPositions.forEach(pos => {
-        const novaMesh = new THREE.Mesh(
-          new THREE.SphereGeometry(3.5, 16, 16),
-          new THREE.MeshBasicMaterial({ color: 0xff4422 })
-        );
-        novaMesh.position.copy(pos);
-        scene.add(novaMesh);
-
-        const ringMesh = new THREE.Mesh(
-          new THREE.RingGeometry(8, 10, 32),
-          new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide })
-        );
-        ringMesh.position.copy(pos);
-        ringMesh.lookAt(0, 0, 0);
-        scene.add(ringMesh);
-      });
-
-      // 8 Aglomerados de Messier
-      [
-        new THREE.Vector3(80, 220, -280), new THREE.Vector3(-140, 290, -180),
-        new THREE.Vector3(120, 240, -260), new THREE.Vector3(90, 80, -350),
-        new THREE.Vector3(-50, 300, -210), new THREE.Vector3(-20, 280, -240),
-        new THREE.Vector3(60, 140, -320),  new THREE.Vector3(-110, 320, -150)
-      ].forEach(pos => {
-        const mMesh = new THREE.Mesh(
-          new THREE.SphereGeometry(4.5, 12, 12),
-          new THREE.MeshBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.55 })
-        );
-        mMesh.position.copy(pos);
-        scene.add(mMesh);
-      });
-    }
-
-    // 2. IOAA Problema 2: Desafio de Latitude (Lat -33.0° S)
-    function buildSceneLatitudeChallenge(scene) {
-      const cometGroup = new THREE.Group();
-      scene.add(cometGroup);
-      const cometData = [
-        { pos: new THREE.Vector3(150, 210, 280), tailDir: new THREE.Vector3(0.3, 0.8, -0.5) },
-        { pos: new THREE.Vector3(-220, 260, 140), tailDir: new THREE.Vector3(-0.4, 0.7, -0.4) },
-        { pos: new THREE.Vector3(260, 120, -200), tailDir: new THREE.Vector3(0.5, 0.6, 0.5) }
-      ];
-
-      cometData.forEach(c => {
-        const head = new THREE.Mesh(
-          new THREE.SphereGeometry(3.8, 16, 16),
-          new THREE.MeshBasicMaterial({ color: 0x88ffff })
-        );
-        head.position.copy(c.pos);
-        cometGroup.add(head);
-
-        const tailPts = [c.pos.clone(), c.pos.clone().add(c.tailDir.clone().multiplyScalar(45))];
-        cometGroup.add(new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints(tailPts),
-          new THREE.LineBasicMaterial({ color: 0x44ccff, linewidth: 3, transparent: true, opacity: 0.75 })
-        ));
-      });
-
-      animationCallbacks.push(() => { cometGroup.rotation.y += 0.001; });
-    }
-
-    // 3. IOAA Problema 3: Observador na Lua (Eclipse Solar por Terra)
-    function buildSceneLunarEclipse(scene) {
-      const moonTerrain = new THREE.Mesh(
-        new THREE.RingGeometry(20, 390, 64),
-        new THREE.MeshBasicMaterial({ color: 0x22252c, side: THREE.DoubleSide })
-      );
-      moonTerrain.rotation.x = Math.PI / 2;
-      moonTerrain.position.y = -1.2;
-      scene.add(moonTerrain);
-
-      const earthAltRad = THREE.MathUtils.degToRad(40);
-      const earthAzRad  = THREE.MathUtils.degToRad(270);
-      const earthR = 380;
-      const earthPos = new THREE.Vector3(
-        earthR * Math.cos(earthAltRad) * Math.sin(earthAzRad),
-        earthR * Math.sin(earthAltRad),
-        earthR * Math.cos(earthAltRad) * Math.cos(earthAzRad)
-      );
-
-      const earthMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(18, 32, 32),
-        new THREE.MeshBasicMaterial({ color: 0x050810 })
-      );
-      earthMesh.position.copy(earthPos);
-      scene.add(earthMesh);
-
-      const ringMesh = new THREE.Mesh(
-        new THREE.RingGeometry(18.2, 22.5, 64),
-        new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide, transparent: true, opacity: 0.95 })
-      );
-      ringMesh.position.copy(earthPos);
-      ringMesh.lookAt(0, 0, 0);
-      scene.add(ringMesh);
-
-      const junoMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(2.8, 12, 12),
-        new THREE.MeshBasicMaterial({ color: 0xeeeeaa })
-      );
-      junoMesh.position.set(earthPos.x + 35, earthPos.y - 15, earthPos.z + 20);
-      scene.add(junoMesh);
-
-      animationCallbacks.push(() => {
-        earthMesh.rotation.y += 0.0008;
-        ringMesh.rotation.y += 0.0008;
-        junoMesh.rotation.y += 0.0008;
-      });
-    }
-
-    // 4. Sistema Binário Sincronizado (Quando o segundo Sol chegar)
-    function buildSceneBinarySystem(scene) {
-      // Meridiano de referência
-      const linePts = [];
-      for (let a = 0; a <= Math.PI; a += 0.03) {
-        linePts.push(new THREE.Vector3(0, 390 * Math.sin(a), 390 * Math.cos(a)));
+      var tex = makeStarTexture();
+      for (var i = 0; i < tiers.length; i++) {
+        var tier = tiers[i];
+        if (!tier.pos.length) continue;
+        var geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(tier.pos, 3));
+        geo.setAttribute("color",    new THREE.Float32BufferAttribute(tier.col, 3));
+        sc.add(new THREE.Points(geo, new THREE.PointsMaterial({
+          size: tier.sz, map: tex, vertexColors: true, transparent: true,
+          blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: false
+        })));
       }
-      scene.add(new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints(linePts),
-        new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2, transparent: true, opacity: 0.5 })
+      console.log("Stars rendered:", STELLARIUM_CATALOG.length);
+    }
+
+    // ---- SCENE BUILDERS ----
+    function buildKeszthely(sc) {
+      var pts = [];
+      for (var a = 0; a <= Math.PI; a += 0.03)
+        pts.push(new THREE.Vector3(0, 390 * Math.sin(a), 390 * Math.cos(a)));
+      var mg = new THREE.Group();
+      mg.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.6 })
       ));
+      sc.add(mg);
+      animCBs.push(function() { mg.rotation.y += 0.0004; });
 
-      const plo1 = new THREE.Mesh(
-        new THREE.SphereGeometry(10, 24, 24),
-        new THREE.MeshBasicMaterial({ color: 0xffaa00 })
-      );
-      scene.add(plo1);
+      var novaPos = [[140,270,-250], [-80,310,-210], [260,180,200]];
+      for (var i = 0; i < novaPos.length; i++) {
+        var np = novaPos[i];
+        var nv = new THREE.Mesh(new THREE.SphereGeometry(3.5,16,16), new THREE.MeshBasicMaterial({color:0xff4422}));
+        nv.position.set(np[0],np[1],np[2]); sc.add(nv);
+        var rg = new THREE.Mesh(new THREE.RingGeometry(8,10,32), new THREE.MeshBasicMaterial({color:0xff3300, side:THREE.DoubleSide}));
+        rg.position.set(np[0],np[1],np[2]); rg.lookAt(0,0,0); sc.add(rg);
+      }
 
-      const plo2 = new THREE.Mesh(
-        new THREE.SphereGeometry(7, 24, 24),
-        new THREE.MeshBasicMaterial({ color: 0x00d2ff })
-      );
-      scene.add(plo2);
-
-      // Centro de Massa (fixo)
-      const com = new THREE.Mesh(
-        new THREE.SphereGeometry(2.5, 12, 12),
-        new THREE.MeshBasicMaterial({ color: 0xffffff })
-      );
-      com.position.set(0, 278, 214);
-      scene.add(com);
-
-      // Órbita binária animada ao redor do centro de massa
-      const binaryRadius = 40;
-      let binaryAngle = 0;
-      const cx = com.position.x, cy = com.position.y, cz = com.position.z;
-      animationCallbacks.push(() => {
-        binaryAngle += 0.0015;
-        plo1.position.set(
-          cx + binaryRadius * Math.cos(binaryAngle),
-          cy + 8,
-          cz + binaryRadius * Math.sin(binaryAngle)
-        );
-        plo2.position.set(
-          cx - binaryRadius * 0.6 * Math.cos(binaryAngle),
-          cy - 5,
-          cz - binaryRadius * 0.6 * Math.sin(binaryAngle)
-        );
-      });
-    }
-
-    // 5. Maker Studio Customizado
-    function buildSceneCustomMaker(scene, customTarget) {
-      if (customTarget === 'nova') {
-        const novaGeo = new THREE.SphereGeometry(4.5, 16, 16);
-        const novaMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
-        const nova = new THREE.Mesh(novaGeo, novaMat);
-        nova.position.set(120, 260, -220);
-        scene.add(nova);
-
-        const ringGeo = new THREE.RingGeometry(9, 11, 32);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.position.set(120, 260, -220);
-        ring.lookAt(0, 0, 0);
-        scene.add(ring);
-      } else if (customTarget === 'meridian') {
-        const linePts = [];
-        for (let a = 0; a <= Math.PI; a += 0.04) {
-          linePts.push(new THREE.Vector3(0, 385 * Math.sin(a), 385 * Math.cos(a)));
-        }
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
-        const lineMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2 });
-        scene.add(new THREE.Line(lineGeo, lineMat));
-      } else if (customTarget === 'comet') {
-        const headGeo = new THREE.SphereGeometry(4, 16, 16);
-        const head = new THREE.Mesh(headGeo, new THREE.MeshBasicMaterial({ color: 0x88ffff }));
-        head.position.set(160, 230, 200);
-        scene.add(head);
-
-        const tailPts = [new THREE.Vector3(160, 230, 200), new THREE.Vector3(190, 280, 160)];
-        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(tailPts), new THREE.LineBasicMaterial({ color: 0x44ccff, linewidth: 3 })));
-      } else if (customTarget === 'eclipse') {
-        buildSceneLunarEclipse(scene);
+      var messier = [[80,220,-280],[-140,290,-180],[120,240,-260],[90,80,-350],[-50,300,-210],[-20,280,-240],[60,140,-320],[-110,320,-150]];
+      for (var i = 0; i < messier.length; i++) {
+        var mp = messier[i];
+        var m = new THREE.Mesh(new THREE.SphereGeometry(4.5,12,12), new THREE.MeshBasicMaterial({color:0x88ccff, transparent:true, opacity:0.55}));
+        m.position.set(mp[0],mp[1],mp[2]); sc.add(m);
       }
     }
 
-    // 4. Inicialização do Motor WebGL
-    function init() {
-      const container = document.getElementById('container');
-      
+    function buildLatitude(sc) {
+      var cg = new THREE.Group();
+      sc.add(cg);
+      var comets = [
+        { p: [150, 210, 280],   t: [13.5, 36, -22.5] },
+        { p: [-220, 260, 140],  t: [-18,  31.5, -18]  },
+        { p: [260, 120, -200],  t: [22.5, 27,   22.5] }
+      ];
+      for (var i = 0; i < comets.length; i++) {
+        var c = comets[i];
+        var h = new THREE.Mesh(new THREE.SphereGeometry(3.8,16,16), new THREE.MeshBasicMaterial({color:0x88ffff}));
+        h.position.set(c.p[0], c.p[1], c.p[2]);
+        cg.add(h);
+        cg.add(new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(c.p[0], c.p[1], c.p[2]),
+            new THREE.Vector3(c.p[0]+c.t[0], c.p[1]+c.t[1], c.p[2]+c.t[2])
+          ]),
+          new THREE.LineBasicMaterial({color:0x44ccff, transparent:true, opacity:0.75})
+        ));
+      }
+      animCBs.push(function() { cg.rotation.y += 0.001; });
+    }
+
+    function buildLunar(sc) {
+      var tr = new THREE.Mesh(new THREE.RingGeometry(20,390,64), new THREE.MeshBasicMaterial({color:0x22252c, side:THREE.DoubleSide}));
+      tr.rotation.x = Math.PI / 2; tr.position.y = -1.2; sc.add(tr);
+      var alt = THREE.MathUtils.degToRad(40);
+      var az  = THREE.MathUtils.degToRad(270);
+      var R   = 380;
+      var ex  = R * Math.cos(alt) * Math.sin(az);
+      var ey  = R * Math.sin(alt);
+      var ez  = R * Math.cos(alt) * Math.cos(az);
+      var earth = new THREE.Mesh(new THREE.SphereGeometry(18,32,32), new THREE.MeshBasicMaterial({color:0x050810}));
+      earth.position.set(ex, ey, ez); sc.add(earth);
+      var ring = new THREE.Mesh(new THREE.RingGeometry(18.2,22.5,64), new THREE.MeshBasicMaterial({color:0xff3300, side:THREE.DoubleSide, transparent:true, opacity:0.95}));
+      ring.position.set(ex, ey, ez); ring.lookAt(0,0,0); sc.add(ring);
+      var juno = new THREE.Mesh(new THREE.SphereGeometry(2.8,12,12), new THREE.MeshBasicMaterial({color:0xeeeeaa}));
+      juno.position.set(ex+35, ey-15, ez+20); sc.add(juno);
+      animCBs.push(function() { earth.rotation.y += 0.0008; ring.rotation.y += 0.0008; juno.rotation.y += 0.0008; });
+    }
+
+    function buildBinary(sc) {
+      var pts = [];
+      for (var a = 0; a <= Math.PI; a += 0.03)
+        pts.push(new THREE.Vector3(0, 390 * Math.sin(a), 390 * Math.cos(a)));
+      sc.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({color:0x00f0ff, transparent:true, opacity:0.5})
+      ));
+      var com = new THREE.Mesh(new THREE.SphereGeometry(2.5,12,12), new THREE.MeshBasicMaterial({color:0xffffff}));
+      com.position.set(0, 278, 214); sc.add(com);
+      var p1 = new THREE.Mesh(new THREE.SphereGeometry(10,24,24), new THREE.MeshBasicMaterial({color:0xffaa00})); sc.add(p1);
+      var p2 = new THREE.Mesh(new THREE.SphereGeometry(7,24,24),  new THREE.MeshBasicMaterial({color:0x00d2ff})); sc.add(p2);
+      var cx = 0, cy = 278, cz = 214, r = 40, angle = 0;
+      animCBs.push(function() {
+        angle += 0.0015;
+        p1.position.set(cx + r * Math.cos(angle), cy + 8,  cz + r * Math.sin(angle));
+        p2.position.set(cx - r * 0.6 * Math.cos(angle), cy - 5, cz - r * 0.6 * Math.sin(angle));
+      });
+    }
+
+    function buildCustom(sc, target) {
+      if (target === "eclipse") { buildLunar(sc); return; }
+      var cg = new THREE.Group();
+      if (target === "comet") {
+        var h = new THREE.Mesh(new THREE.SphereGeometry(4,16,16), new THREE.MeshBasicMaterial({color:0x88ffff}));
+        h.position.set(160,230,200); cg.add(h);
+        cg.add(new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(160,230,200), new THREE.Vector3(190,280,160)]),
+          new THREE.LineBasicMaterial({color:0x44ccff})
+        ));
+        sc.add(cg);
+        animCBs.push(function() { cg.rotation.y += 0.001; });
+      } else if (target === "meridian") {
+        var pts = [];
+        for (var a = 0; a <= Math.PI; a += 0.04)
+          pts.push(new THREE.Vector3(0, 385 * Math.sin(a), 385 * Math.cos(a)));
+        cg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({color:0x00f0ff})));
+        sc.add(cg);
+        animCBs.push(function() { cg.rotation.y += 0.0004; });
+      } else if (target === "nova") {
+        var nv = new THREE.Mesh(new THREE.SphereGeometry(4.5,16,16), new THREE.MeshBasicMaterial({color:0xff3300}));
+        nv.position.set(120,260,-220); sc.add(nv);
+        var rg = new THREE.Mesh(new THREE.RingGeometry(9,11,32), new THREE.MeshBasicMaterial({color:0xff3300, side:THREE.DoubleSide}));
+        rg.position.set(120,260,-220); rg.lookAt(0,0,0); sc.add(rg);
+        animCBs.push(function() { nv.rotation.y += 0.002; });
+      }
+    }
+
+    // ---- INIT ENGINE ----
+    function initEngine() {
+      var container = document.getElementById("container");
+      while (container.firstChild) container.removeChild(container.firstChild);
+
+      animCBs.length = 0;
+
       scene = new THREE.Scene();
-      // Reset per‑frame callbacks for the new simulation
-      animationCallbacks.length = 0;
       scene.background = new THREE.Color(0x010206);
 
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -653,218 +328,149 @@
       renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.outputEncoding = THREE.sRGBEncoding;
       container.appendChild(renderer.domElement);
 
-      // Renderizar o céu de estrelas em 5 camadas de Pogson do Stellarium
-      renderStellariumMultiTierStars(scene, currentSim.lat, currentSim.lst, currentSim.bortle);
+      buildStars(scene, sim.lat, sim.lst, sim.bortle);
 
-      // Renderizar os elementos únicos de cada problema
-      if (currentSim.sceneType === 'p1_keszthely') {
-        buildSceneKeszthely(scene);
-      } else if (currentSim.sceneType === 'p2_latitude') {
-        buildSceneLatitudeChallenge(scene);
-      } else if (currentSim.sceneType === 'p3_lunar') {
-        buildSceneLunarEclipse(scene);
-      } else if (currentSim.sceneType === 'binary_system') {
-        buildSceneBinarySystem(scene);
-      } else if (currentSim.sceneType === 'custom_maker') {
-        buildSceneCustomMaker(scene, currentSim.customTarget);
+      if      (sim.type === "keszthely") buildKeszthely(scene);
+      else if (sim.type === "latitude")  buildLatitude(scene);
+      else if (sim.type === "lunar")     buildLunar(scene);
+      else if (sim.type === "binary")    buildBinary(scene);
+      else if (sim.type === "custom")    buildCustom(scene, sim.target);
+
+      if (sim.type !== "lunar") {
+        var hz = new THREE.Mesh(
+          new THREE.RingGeometry(385, 390, 64),
+          new THREE.MeshBasicMaterial({color:0x00f0ff, side:THREE.DoubleSide, opacity:0.35, transparent:true})
+        );
+        hz.rotation.x = Math.PI / 2; scene.add(hz);
+        var gr = new THREE.Mesh(
+          new THREE.CircleGeometry(385, 48),
+          new THREE.MeshBasicMaterial({color:0x080c10, side:THREE.DoubleSide})
+        );
+        gr.rotation.x = Math.PI / 2; gr.position.y = -1; scene.add(gr);
       }
 
-      // Horizonte e Solo
-      if (currentSim.sceneType !== 'p3_lunar') {
-        const horizonGeo = new THREE.RingGeometry(385, 390, 64);
-        const horizonMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, opacity: 0.35, transparent: true });
-        const horizon = new THREE.Mesh(horizonGeo, horizonMat);
-        horizon.rotation.x = Math.PI / 2;
-        scene.add(horizon);
-
-        const groundGeo = new THREE.CircleGeometry(385, 48);
-        const groundMat = new THREE.MeshBasicMaterial({ color: 0x010306, side: THREE.DoubleSide });
-        const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.rotation.x = Math.PI / 2;
-        ground.position.y = -0.5;
-        scene.add(ground);
-      }
-
-      // Suporte a Giroscópio
-      window.addEventListener('deviceorientation', handleOrientation, true);
-      window.addEventListener('orientationchange', handleScreenOrientation, false);
-      handleScreenOrientation();
-
-      // Suporte a Mouse / Touch para Desktop e Celular
-      let isUserInteracting = false;
-      let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
-      let lon = 0, onPointerDownLon = 0;
-      let lat = 0, onPointerDownLat = 0;
-
-      container.addEventListener('pointerdown', function(e) {
-        if (hasOrientation) return;
-        isUserInteracting = true;
-        onPointerDownPointerX = e.clientX;
-        onPointerDownPointerY = e.clientY;
-        onPointerDownLon = lon;
-        onPointerDownLat = lat;
-      });
-
-      document.addEventListener('pointermove', function(e) {
-        if (!isUserInteracting || hasOrientation) return;
-        lon = (onPointerDownPointerX - e.clientX) * 0.15 + onPointerDownLon;
-        lat = (e.clientY - onPointerDownPointerY) * 0.15 + onPointerDownLat;
-      });
-
-      document.addEventListener('pointerup', function() { isUserInteracting = false; });
-
-      window.addEventListener('resize', onWindowResize, false);
-
-      function enterVRMode() {
-        uiOverlay.style.display = 'none';
-        topBar.style.display = 'flex';
-        leftEyeFrame.style.display = 'flex';
-        rightEyeFrame.style.display = 'flex';
-        dividerLine.style.display = 'block';
-        isVR = true;
-        applyCalibratedStyle();
-
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        }
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(() => {});
-        }
-        requestGyroPermission();
-      }
-
-      function enterMonoMode() {
-        uiOverlay.style.display = 'none';
-        topBar.style.display = 'flex';
-        leftEyeFrame.style.display = 'none';
-        rightEyeFrame.style.display = 'none';
-        dividerLine.style.display = 'none';
-        isVR = false;
-        requestGyroPermission();
-      }
-
-      function requestGyroPermission() {
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-          DeviceOrientationEvent.requestPermission()
-            .then(state => {
-              if (state === 'granted') {
-                window.addEventListener('deviceorientation', handleOrientation, true);
-              }
-            }).catch(console.error);
-        }
-      }
-
-      startVRBtn.addEventListener('click', enterVRMode);
-      startMonoBtn.addEventListener('click', enterMonoMode);
-
-      toggleVRBtn.addEventListener('click', () => {
-        if (isVR) enterMonoMode();
-        else enterVRMode();
-      });
-
-      function animate() {
-        requestAnimationFrame(animate);
-
-        if (hasOrientation) {
-          updateCameraFromOrientation();
-        } else {
-          // Clamp latitude limits
-          lat = Math.max(-85, Math.min(85, lat));
-          // Auto-rotate the view slowly when the user is not interacting
-          if (!isUserInteracting) {
-            lon += 0.05; // adjust speed as needed
-          }
-          const phi = THREE.MathUtils.degToRad(90 - lat);
-          const theta = THREE.MathUtils.degToRad(lon);
-
-          const target = new THREE.Vector3();
-          target.x = 500 * Math.sin(phi) * Math.cos(theta);
-          target.y = 500 * Math.cos(phi);
-          target.z = 500 * Math.sin(phi) * Math.sin(theta);
-          camera.lookAt(target);
-        }
-
-        // Execute per-simulation animation callbacks
-        animationCallbacks.forEach(cb => cb());
-
-        renderVR();
-      }
-
-      animate();
+      // Interaction
+      var el = renderer.domElement;
+      var downX = 0, downY = 0, downLon = 0, downLat = 0;
+      el.addEventListener("mousedown", function(e) { isInteracting=true; downX=e.clientX; downY=e.clientY; downLon=lon; downLat=lat; });
+      el.addEventListener("mousemove", function(e) { if (!isInteracting) return; lon=(downX-e.clientX)*0.15+downLon; lat=(e.clientY-downY)*0.15+downLat; });
+      el.addEventListener("mouseup",   function()  { isInteracting=false; });
+      el.addEventListener("touchstart", function(e) { e.preventDefault(); isInteracting=true; downX=e.touches[0].clientX; downY=e.touches[0].clientY; downLon=lon; downLat=lat; }, { passive: false });
+      el.addEventListener("touchmove",  function(e) { e.preventDefault(); if (!isInteracting) return; lon=(downX-e.touches[0].clientX)*0.15+downLon; lat=(e.touches[0].clientY-downY)*0.15+downLat; }, { passive: false });
+      el.addEventListener("touchend",   function()  { isInteracting=false; });
+      window.addEventListener("resize", function() { camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
     }
 
-    function handleOrientation(e) {
-      if (e.alpha !== null && e.beta !== null && e.gamma !== null) {
-        hasOrientation = true;
-        deviceOrientation = {
-          alpha: THREE.MathUtils.degToRad(e.alpha || 0),
-          beta: THREE.MathUtils.degToRad(e.beta || 0),
-          gamma: THREE.MathUtils.degToRad(e.gamma || 0)
-        };
+    // ---- ANIMATE LOOP ----
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (hasGyro) {
+        updateGyro();
+      } else {
+        lat = Math.max(-85, Math.min(85, lat));
+        if (!isInteracting) lon += 0.03;
+        var phi   = THREE.MathUtils.degToRad(90 - lat);
+        var theta = THREE.MathUtils.degToRad(lon);
+        camera.lookAt(
+          500 * Math.sin(phi) * Math.cos(theta),
+          500 * Math.cos(phi),
+          500 * Math.sin(phi) * Math.sin(theta)
+        );
       }
+
+      for (var i = 0; i < animCBs.length; i++) animCBs[i]();
+
+      renderFrame();
     }
 
-    function handleScreenOrientation() {
-      screenOrientation = THREE.MathUtils.degToRad(window.orientation || 0);
+    // ---- GYRO ----
+    var zee2   = new THREE.Vector3(0, 0, 1);
+    var euler2 = new THREE.Euler();
+    var q0a    = new THREE.Quaternion();
+    var q1a    = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
+
+    function updateGyro() {
+      euler2.set(gyro.b, gyro.a, -gyro.g, "YXZ");
+      camera.quaternion.setFromEuler(euler2);
+      camera.quaternion.multiply(q1a);
+      camera.quaternion.multiply(q0a.setFromAxisAngle(zee2, -screenOri));
     }
 
-    const zee = new THREE.Vector3(0, 0, 1);
-    const euler = new THREE.Euler();
-    const q0 = new THREE.Quaternion();
-    const q1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
+    window.addEventListener("deviceorientation", function(e) {
+      if (e.alpha === null) return;
+      hasGyro = true;
+      gyro = {
+        a: THREE.MathUtils.degToRad(e.alpha || 0),
+        b: THREE.MathUtils.degToRad(e.beta  || 0),
+        g: THREE.MathUtils.degToRad(e.gamma || 0)
+      };
+    }, true);
+    window.addEventListener("orientationchange", function() {
+      screenOri = THREE.MathUtils.degToRad(window.orientation || 0);
+    });
 
-    function updateCameraFromOrientation() {
-      const alpha = deviceOrientation.alpha;
-      const beta = deviceOrientation.beta;
-      const gamma = deviceOrientation.gamma;
-      const orient = screenOrientation;
-
-      euler.set(beta, alpha, -gamma, 'YXZ');
-      camera.quaternion.setFromEuler(euler);
-      camera.quaternion.multiply(q1);
-      camera.quaternion.multiply(q0.setFromAxisAngle(zee, -orient));
-    }
-
-    function renderVR() {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const halfWidth = Math.floor(width / 2);
-
+    // ---- RENDER VR / MONO ----
+    function renderFrame() {
+      var w = window.innerWidth, h = window.innerHeight, hw = Math.floor(w / 2);
       if (!isVR) {
-        renderer.setViewport(0, 0, width, height);
-        renderer.setScissor(0, 0, width, height);
+        renderer.setViewport(0, 0, w, h);
         renderer.setScissorTest(false);
-        camera.aspect = width / height;
+        camera.aspect = w / h;
         camera.updateProjectionMatrix();
         renderer.render(scene, camera);
         return;
       }
-
-      camera.aspect = halfWidth / height;
+      camera.aspect = hw / h;
       camera.updateProjectionMatrix();
-
-      // Olho Esquerdo
-      renderer.setViewport(0 + eyeShiftPixels, 0, halfWidth, height);
-      renderer.setScissor(0, 0, halfWidth, height);
       renderer.setScissorTest(true);
+      renderer.setViewport(EYE_SHIFT, 0, hw, h);
+      renderer.setScissor(0, 0, hw, h);
       renderer.render(scene, camera);
-
-      // Olho Direito
-      renderer.setViewport(halfWidth - eyeShiftPixels, 0, halfWidth, height);
-      renderer.setScissor(halfWidth, 0, halfWidth, height);
-      renderer.setScissorTest(true);
+      renderer.setViewport(hw - EYE_SHIFT, 0, hw, h);
+      renderer.setScissor(hw, 0, hw, h);
       renderer.render(scene, camera);
     }
 
-    function onWindowResize() {
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      applyCalibratedStyle();
+    // ---- UI BUTTONS ----
+    function resizeLenses() {
+      var h = window.innerHeight * 0.72, w = h * 0.75;
+      var ll = document.getElementById("lens-left");
+      var lr = document.getElementById("lens-right");
+      ll.style.width = w + "px"; ll.style.height = h + "px";
+      lr.style.width = w + "px"; lr.style.height = h + "px";
     }
 
-    window.addEventListener('DOMContentLoaded', init);
+    function enterVR() {
+      document.getElementById("ui-overlay").style.display = "none";
+      document.getElementById("top-bar").style.display = "flex";
+      document.getElementById("left-eye-frame").style.display = "flex";
+      document.getElementById("right-eye-frame").style.display = "flex";
+      document.getElementById("divider-line").style.display = "block";
+      isVR = true;
+      resizeLenses();
+      if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function")
+        DeviceOrientationEvent.requestPermission().catch(function() {});
+    }
+
+    function enterMono() {
+      document.getElementById("ui-overlay").style.display = "none";
+      document.getElementById("top-bar").style.display = "flex";
+      document.getElementById("left-eye-frame").style.display = "none";
+      document.getElementById("right-eye-frame").style.display = "none";
+      document.getElementById("divider-line").style.display = "none";
+      isVR = false;
+    }
+
+    document.getElementById("start-vr-btn").addEventListener("click", enterVR);
+    document.getElementById("start-mono-btn").addEventListener("click", enterMono);
+    document.getElementById("toggle-vr-btn").addEventListener("click", function() { if (isVR) enterMono(); else enterVR(); });
+
+    // ---- START ----
+    initEngine();
+    animate();
   </script>
 </body>
 </html>
