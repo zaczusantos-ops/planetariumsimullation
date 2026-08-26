@@ -914,13 +914,24 @@
       window.location.href = `player.html?sim=custom&lat=${lat}&lst=${lst}&bortle=${bortle}&target=${target}`;
     });
 
-    // 4. Live 3D Celestial Preview (Three.js no Canvas)
-    let pRenderer, pScene, pCamera, pStarsGroup;
+    // 4. Live 3D Celestial Preview (Three.js com o Céu Oficial do Stellarium)
+    let pRenderer, pScene, pCamera, pStarsGroup, stellariumData = null;
+
+    // Carregar catálogo oficial do Stellarium
+    fetch('data/stellarium_sky.json')
+      .then(res => res.json())
+      .then(data => {
+        stellariumData = data;
+        updateMakerPreview();
+      })
+      .catch(() => {});
+
     function initMakerPreview() {
       const canvas = document.getElementById('three-preview-canvas');
       const box = canvas.parentElement;
       
       pScene = new THREE.Scene();
+      pScene.background = new THREE.Color(0x020408);
       pCamera = new THREE.PerspectiveCamera(65, box.clientWidth / box.clientHeight, 0.1, 1000);
       pCamera.position.set(0, 0, 0.1);
 
@@ -946,7 +957,6 @@
         pCamera.lookAt(500 * Math.sin(phi) * Math.cos(theta), 500 * Math.cos(phi), 500 * Math.sin(phi) * Math.sin(theta));
       });
 
-      // Animação contínua
       function animate() {
         requestAnimationFrame(animate);
         pRenderer.render(pScene, pCamera);
@@ -965,56 +975,49 @@
       const lst = parseFloat(makerLst.value);
       const bortle = parseInt(makerBortle.value);
 
-      // Magnitude limite pelo Bortle
       const bortleMagLimits = { 1: 6.5, 2: 6.0, 3: 5.5, 4: 5.0, 5: 4.5, 6: 4.0, 7: 3.5, 8: 2.8, 9: 2.0 };
       const mLim = bortleMagLimits[bortle] || 6.0;
-
-      // Gerar estrelas pseudo-reais projetadas astronomicamente
-      const starCount = Math.round(5000 * Math.pow(mLim / 6.5, 2.5));
-      document.getElementById('preview-star-count').textContent = `Estrelas: ~${starCount}`;
-
-      const geometry = new THREE.BufferGeometry();
-      const positions = [];
-      const colors = [];
-      const sizes = [];
 
       const latRad = THREE.MathUtils.degToRad(lat);
       const lstRad = THREE.MathUtils.degToRad(lst * 15);
 
-      // Distribuição estelar esférica
-      for (let i = 0; i < starCount; i++) {
-        // Coordenadas equatoriais
-        const dec = (Math.random() - 0.5) * Math.PI;
-        const ra = Math.random() * 2 * Math.PI;
-        const mag = Math.random() * mLim;
+      const positions = [];
+      const colors = [];
+      let visibleCount = 0;
 
-        // Horizonal (Alt, Az)
-        const H = lstRad - ra;
-        const sinAlt = Math.sin(latRad) * Math.sin(dec) + Math.cos(latRad) * Math.cos(dec) * Math.cos(H);
-        const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+      if (stellariumData && stellariumData.stars) {
+        stellariumData.stars.forEach(s => {
+          if (s.mag <= mLim) {
+            const raRad = THREE.MathUtils.degToRad(s.ra);
+            const decRad = THREE.MathUtils.degToRad(s.dec);
+            const H = lstRad - raRad;
+            const sinAlt = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(H);
+            const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
 
-        if (alt > 0) {
-          const y = -Math.cos(dec) * Math.sin(H);
-          const x = Math.sin(dec) * Math.cos(latRad) - Math.cos(dec) * Math.sin(latRad) * Math.cos(H);
-          const az = Math.atan2(y, x);
+            if (alt > 0) {
+              visibleCount++;
+              const y = -Math.cos(decRad) * Math.sin(H);
+              const x = Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.sin(latRad) * Math.cos(H);
+              const az = Math.atan2(y, x);
 
-          const r = 200;
-          positions.push(r * Math.cos(alt) * Math.sin(az), r * Math.sin(alt), r * Math.cos(alt) * Math.cos(az));
+              const r = 200;
+              positions.push(r * Math.cos(alt) * Math.sin(az), r * Math.sin(alt), r * Math.cos(alt) * Math.cos(az));
 
-          // Cor espectral aleatória coerente
-          const tempType = Math.random();
-          if (tempType > 0.8) colors.push(0.7, 0.85, 1.0); // Azul
-          else if (tempType > 0.4) colors.push(1.0, 1.0, 0.95); // Branco
-          else if (tempType > 0.15) colors.push(1.0, 0.8, 0.4); // Laranja
-          else colors.push(1.0, 0.4, 0.3); // Vermelho
-        }
+              const intensity = Math.max(0.4, 1.4 * Math.pow(10, -0.16 * s.mag));
+              colors.push(s.rgb[0] * intensity, s.rgb[1] * intensity, s.rgb[2] * intensity);
+            }
+          }
+        });
       }
 
+      document.getElementById('preview-star-count').textContent = `Estrelas Stellarium: ~${visibleCount}`;
+
+      const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
       geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
       const pMaterial = new THREE.PointsMaterial({
-        size: 2.5,
+        size: 3.2,
         vertexColors: true,
         transparent: true,
         opacity: 0.95
@@ -1025,7 +1028,7 @@
 
       // Linha do Horizonte
       const horizonGeo = new THREE.RingGeometry(190, 195, 64);
-      const horizonMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, opacity: 0.2, transparent: true });
+      const horizonMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, opacity: 0.25, transparent: true });
       const horizon = new THREE.Mesh(horizonGeo, horizonMat);
       horizon.rotation.x = Math.PI / 2;
       pStarsGroup.add(horizon);
