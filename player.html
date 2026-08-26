@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>AstroVR • Planetário Stellarium 360°</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,7 +38,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: rgba(4, 7, 14, 0.94);
+      background: rgba(4, 7, 14, 0.95);
       backdrop-filter: blur(16px);
       color: white;
       z-index: 999;
@@ -166,7 +168,9 @@
       display: none;
     }
   </style>
+  <!-- Three.js e Catálogo Síncrono do Stellarium -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="data/stellarium_catalog.js?v=2.7"></script>
 </head>
 <body>
 
@@ -178,10 +182,10 @@
 
   <!-- Tela de Início / Overlay -->
   <div id="ui-overlay">
-    <div id="sim-badge" class="badge">🪐 CÉU DO STELLARIUM (HIPPARCOS REAL)</div>
+    <div id="sim-badge" class="badge">🪐 CÉU OFICIAL DO STELLARIUM (8.870 ESTRELAS)</div>
     <h1 id="sim-title">Planetário Astronômico 360°</h1>
     <p id="sim-desc">
-      Explore o céu em 360°. Para usar com óculos VR Cardboard, clique no botão azul e vire o smartphone na horizontal.
+      Explore o domo celeste em 360°. Para usar com óculos VR Cardboard, clique no botão azul e vire o smartphone na horizontal.
     </p>
     <div class="btn-group">
       <button class="btn" id="start-vr-btn">👓 ENTRAR NO MODO VR CARDBOARD</button>
@@ -203,12 +207,12 @@
   <div id="container"></div>
 
   <script>
-    // 1. Definições Oficiais de Cada Simulação (Distintas e Físicas)
+    // 1. Catálogo Oficial de Cada Simulação (Configurações Individuais Exatas)
     const SIM_DATABASE = {
       'ioaa2019_p1': {
         title: 'IOAA 2019 • Problema 1: Céu de Keszthely',
         badge: '🇭🇺 IOAA 2019 • HUNGARY ROUND 1',
-        desc: 'Céu à meia-noite em Keszthely (+46.8° N, LST = 01h 00m) com γ Cassiopeiae no meridiano, 3 novas de 2ª magnitude e os 8 aglomerados de Messier.',
+        desc: 'Céu à meia-noite em Keszthely (+46.8° N, LST = 01h 00m) com γ Cassiopeiae no meridiano superior, 3 novas de 2ª magnitude e os 8 aglomerados de Messier.',
         lat: 46.77,
         lst: 1.0,
         bortle: 2,
@@ -243,7 +247,7 @@
       }
     };
 
-    // Leitura dos Parâmetros da URL
+    // Parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
     const simKey = urlParams.get('sim') || 'ioaa2019_p1';
     const isCustom = simKey === 'custom' || urlParams.has('custom_id') || urlParams.has('lat');
@@ -300,172 +304,61 @@
       lensRight.style.height = sizeVal;
     }
 
-    // 2. Criação da Textura de Ponto Suave Circular (Airy Disk / Glow do Stellarium)
-    function createGlowStarTexture() {
+    // 2. Textura de Estrela Suave Perfeitamente Circular (Airy Disk)
+    function createStarGlowTexture() {
       const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 64;
+      canvas.width = 128;
+      canvas.height = 128;
       const ctx = canvas.getContext('2d');
 
-      const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
       grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
-      grad.addColorStop(0.18, 'rgba(255, 255, 255, 0.95)');
-      grad.addColorStop(0.40, 'rgba(255, 255, 255, 0.45)');
-      grad.addColorStop(0.75, 'rgba(255, 255, 255, 0.10)');
+      grad.addColorStop(0.15, 'rgba(255, 255, 255, 0.95)');
+      grad.addColorStop(0.40, 'rgba(255, 255, 255, 0.40)');
+      grad.addColorStop(0.75, 'rgba(255, 255, 255, 0.08)');
       grad.addColorStop(1.0, 'rgba(255, 255, 255, 0.0)');
 
       ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 64, 64);
+      ctx.fillRect(0, 0, 128, 128);
 
       const tex = new THREE.CanvasTexture(canvas);
       tex.needsUpdate = true;
       return tex;
     }
 
-    // 3. Shaders GLSL de Estrelas do Stellarium (Pontos Redondos + Escala de Pogson)
-    const starVertexShader = `
-      attribute float aSize;
-      attribute vec3 aColor;
-      varying vec3 vColor;
-      void main() {
-        vColor = aColor;
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = aSize * (400.0 / -mvPosition.z);
-        gl_Position = projectionMatrix * mvPosition;
+    // 3. Montagem do Céu Real do Stellarium em 5 Camadas de Magnitude (Escala de Pogson)
+    function renderStellariumMultiTierStars(targetScene, latDeg, lstHours, bortleLevel) {
+      const stars = window.STELLARIUM_STARS || [];
+      if (!stars || stars.length === 0) {
+        console.warn("Catálogo Stellarium não encontrado na memória.");
+        return;
       }
-    `;
-
-    const starFragmentShader = `
-      uniform sampler2D pointTexture;
-      varying vec3 vColor;
-      void main() {
-        vec4 texColor = texture2D(pointTexture, gl_PointCoord);
-        if (texColor.a < 0.05) discard;
-        gl_FragColor = vec4(vColor, texColor.a);
-      }
-    `;
-
-    // 4. Montador Astronômico do Céu Oficial do Stellarium
-    function buildAstronomicalScene(targetScene, simConfig) {
-      const latDeg = simConfig.lat;
-      const lstHours = simConfig.lst;
-      const bortleLevel = simConfig.bortle || 2;
-      const sceneType = simConfig.sceneType;
 
       const bortleMagLimits = { 1: 6.5, 2: 6.0, 3: 5.5, 4: 5.0, 5: 4.5, 6: 4.0, 7: 3.5, 8: 2.8, 9: 2.0 };
       const mLim = bortleMagLimits[bortleLevel] || 6.0;
 
-      // Carregar catálogo de estrelas do Stellarium
-      fetch('data/stellarium_sky.json')
-        .then(res => res.json())
-        .then(data => {
-          renderStellariumStarField(targetScene, data.stars, latDeg, lstHours, mLim);
-        })
-        .catch(err => {
-          console.error("Erro ao carregar stellarium_sky.json, tentando fallback:", err);
-          fetch('data/bright_stars.json')
-            .then(res => res.json())
-            .then(stars => renderFallbackStarField(targetScene, stars, latDeg, lstHours, mLim));
-        });
-
-      // Elementos Específicos e Únicos de Cada Simulação
-      if (sceneType === 'p1_keszthely') {
-        buildSceneKeszthely(targetScene, latDeg);
-      } else if (sceneType === 'p2_latitude') {
-        buildSceneLatitudeChallenge(targetScene, latDeg);
-      } else if (sceneType === 'p3_lunar') {
-        buildSceneLunarEclipse(targetScene);
-      } else if (sceneType === 'binary_system') {
-        buildSceneBinarySystem(targetScene);
-      } else if (sceneType === 'custom_maker') {
-        buildSceneCustomMaker(targetScene, simConfig.customTarget);
-      }
-
-      // Linha do Horizonte e Solo (Apenas se não for na Lua)
-      if (sceneType !== 'p3_lunar') {
-        const horizonGeo = new THREE.RingGeometry(385, 390, 64);
-        const horizonMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, opacity: 0.35, transparent: true });
-        const horizon = new THREE.Mesh(horizonGeo, horizonMat);
-        horizon.rotation.x = Math.PI / 2;
-        targetScene.add(horizon);
-
-        const groundGeo = new THREE.CircleGeometry(385, 48);
-        const groundMat = new THREE.MeshBasicMaterial({ color: 0x010306, side: THREE.DoubleSide });
-        const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.rotation.x = Math.PI / 2;
-        ground.position.y = -0.5;
-        targetScene.add(ground);
-      }
-    }
-
-    function renderStellariumStarField(targetScene, stars, latDeg, lstHours, mLim) {
       const latRad = THREE.MathUtils.degToRad(latDeg);
       const lstRad = THREE.MathUtils.degToRad(lstHours * 15);
 
-      const positions = [];
-      const colors = [];
-      const sizes = [];
+      // 5 Camadas de Brilho Físico
+      const tiers = [
+        { maxMag: 0.5, size: 28.0, positions: [], colors: [] },  // Tier 1: Sirius, Canopus, Rigel, Vega, Betelgeuse, Alpha Cen
+        { maxMag: 1.8, size: 18.0, positions: [], colors: [] },  // Tier 2: Três Marias, Crux, Pólux, Castor, Spica
+        { maxMag: 3.2, size: 11.0, positions: [], colors: [] },  // Tier 3: Estrelas de 2ª e 3ª magnitude
+        { maxMag: 4.8, size: 6.5,  positions: [], colors: [] },  // Tier 4: Estrelas fracas
+        { maxMag: 6.5, size: 3.8,  positions: [], colors: [] }   // Tier 5: Limite de visão a olho nu
+      ];
 
       stars.forEach(s => {
-        const mag = s.mag;
-        if (mag <= mLim) {
-          const raRad = THREE.MathUtils.degToRad(s.ra);
-          const decRad = THREE.MathUtils.degToRad(s.dec);
-
-          const H = lstRad - raRad;
-          const sinAlt = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(H);
-          const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
-
-          if (alt > -0.01) {
-            const y = -Math.cos(decRad) * Math.sin(H);
-            const x = Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.sin(latRad) * Math.cos(H);
-            const az = Math.atan2(y, x);
-
-            const r = 400;
-            positions.push(r * Math.cos(alt) * Math.sin(az), r * Math.sin(alt), r * Math.cos(alt) * Math.cos(az));
-
-            // Tamanho por escala de Pogson (Stellarium PSF)
-            // Sirius (mag -1.44) -> 24px; Estrelas fracas (mag 6.0) -> 3px
-            const starSize = Math.max(3.0, Math.min(26.0, 15.0 * Math.pow(10.0, -0.16 * mag)));
-            sizes.push(starSize);
-
-            // Brilho visual
-            const intensity = Math.max(0.45, 1.4 * Math.pow(10.0, -0.16 * mag));
-            colors.push(s.rgb[0] * intensity, s.rgb[1] * intensity, s.rgb[2] * intensity);
-          }
-        }
-      });
-
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      geometry.setAttribute('aColor', new THREE.Float32BufferAttribute(colors, 3));
-      geometry.setAttribute('aSize', new THREE.Float32BufferAttribute(sizes, 1));
-
-      const starShaderMaterial = new THREE.ShaderMaterial({
-        uniforms: {
-          pointTexture: { value: createGlowStarTexture() }
-        },
-        vertexShader: starVertexShader,
-        fragmentShader: starFragmentShader,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-
-      const starsMesh = new THREE.Points(geometry, starShaderMaterial);
-      targetScene.add(starsMesh);
-    }
-
-    function renderFallbackStarField(targetScene, stars, latDeg, lstHours, mLim) {
-      const latRad = THREE.MathUtils.degToRad(latDeg);
-      const lstRad = THREE.MathUtils.degToRad(lstHours * 15);
-      const positions = [], colors = [], sizes = [];
-
-      stars.forEach(s => {
+        const raDeg = s[0];
+        const decDeg = s[1];
         const mag = s[2];
+        const rVal = s[3], gVal = s[4], bVal = s[5];
+
         if (mag <= mLim) {
-          const raRad = THREE.MathUtils.degToRad(s[0]);
-          const decRad = THREE.MathUtils.degToRad(s[1]);
+          const raRad = THREE.MathUtils.degToRad(raDeg);
+          const decRad = THREE.MathUtils.degToRad(decDeg);
+
           const H = lstRad - raRad;
           const sinAlt = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(H);
           const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
@@ -476,34 +369,56 @@
             const az = Math.atan2(y, x);
 
             const r = 400;
-            positions.push(r * Math.cos(alt) * Math.sin(az), r * Math.sin(alt), r * Math.cos(alt) * Math.cos(az));
-            sizes.push(Math.max(3.0, Math.min(26.0, 15.0 * Math.pow(10.0, -0.16 * mag))));
-            const intensity = Math.max(0.45, 1.4 * Math.pow(10.0, -0.16 * mag));
-            colors.push(s[3][0] * intensity, s[3][1] * intensity, s[3][2] * intensity);
+            const px = r * Math.cos(alt) * Math.sin(az);
+            const py = r * Math.sin(alt);
+            const pz = r * Math.cos(alt) * Math.cos(az);
+
+            // Determinar em qual camada a estrela se encaixa
+            let targetTier = tiers[4];
+            for (let i = 0; i < tiers.length; i++) {
+              if (mag <= tiers[i].maxMag) {
+                targetTier = tiers[i];
+                break;
+              }
+            }
+
+            targetTier.positions.push(px, py, pz);
+
+            // Escala de brilho por Pogson
+            const intensity = Math.max(0.5, 1.4 * Math.pow(10.0, -0.16 * mag));
+            targetTier.colors.push(rVal * intensity, gVal * intensity, bVal * intensity);
           }
         }
       });
 
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      geometry.setAttribute('aColor', new THREE.Float32BufferAttribute(colors, 3));
-      geometry.setAttribute('aSize', new THREE.Float32BufferAttribute(sizes, 1));
+      const starTexture = createStarGlowTexture();
 
-      const starShaderMaterial = new THREE.ShaderMaterial({
-        uniforms: { pointTexture: { value: createGlowStarTexture() } },
-        vertexShader: starVertexShader,
-        fragmentShader: starFragmentShader,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
+      // Criar a malha de pontos de cada camada
+      tiers.forEach(tier => {
+        if (tier.positions.length > 0) {
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute('position', new THREE.Float32BufferAttribute(tier.positions, 3));
+          geo.setAttribute('color', new THREE.Float32BufferAttribute(tier.colors, 3));
+
+          const mat = new THREE.PointsMaterial({
+            size: tier.size,
+            map: starTexture,
+            vertexColors: true,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+          });
+
+          const mesh = new THREE.Points(geo, mat);
+          targetScene.add(mesh);
+        }
       });
-      targetScene.add(new THREE.Points(geometry, starShaderMaterial));
     }
 
-    // --- CENÁRIOS ESPECÍFICOS ---
+    // --- CENÁRIOS INDIVIDUAIS ESPECÍFICOS DE CADA SIMULAÇÃO ---
 
-    // 1. IOAA Problema 1: Keszthely (Hungria)
-    function buildSceneKeszthely(scene, latDeg) {
+    // 1. IOAA Problema 1: Keszthely (Hungria, Outubro, Lat +46.8°, LST 01h 00m)
+    function buildSceneKeszthely(scene) {
       // Arco do Meridiano Celeste Local (Norte -> Zênite -> Sul)
       const linePts = [];
       for (let a = 0; a <= Math.PI; a += 0.03) {
@@ -513,7 +428,7 @@
       const lineMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2, transparent: true, opacity: 0.6 });
       scene.add(new THREE.Line(lineGeo, lineMat));
 
-      // 3 Novas com anéis indicadores (Pegasus, Cygnus, Auriga)
+      // 3 Novas com anéis indicadores pulsantes (Pegasus, Cygnus, Auriga)
       const novaPositions = [
         new THREE.Vector3(140, 270, -250), // Pegasus
         new THREE.Vector3(-80, 310, -210), // Cygnus
@@ -546,41 +461,40 @@
         new THREE.Vector3(-110, 320, -150)
       ];
       messierPositions.forEach(pos => {
-        const mGeo = new THREE.SphereGeometry(4.0, 12, 12);
-        const mMat = new THREE.MeshBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.5 });
+        const mGeo = new THREE.SphereGeometry(4.5, 12, 12);
+        const mMat = new THREE.MeshBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.55 });
         const mMesh = new THREE.Mesh(mGeo, mMat);
         mMesh.position.copy(pos);
         scene.add(mMesh);
       });
     }
 
-    // 2. IOAA Problema 2: Desafio de Latitude (Lat -33.0° Sul)
-    function buildSceneLatitudeChallenge(scene, latDeg) {
-      // 3 Cometas com caudas de poeira e gás
+    // 2. IOAA Problema 2: Desafio de Latitude (Lat -33.0° S)
+    function buildSceneLatitudeChallenge(scene) {
+      // 3 Cometas com caudas de gás e poeira
       const cometData = [
         { pos: new THREE.Vector3(150, 210, 280), tailDir: new THREE.Vector3(0.3, 0.8, -0.5) },
         { pos: new THREE.Vector3(-220, 260, 140), tailDir: new THREE.Vector3(-0.4, 0.7, -0.4) }, // Na Eclíptica
         { pos: new THREE.Vector3(260, 120, -200), tailDir: new THREE.Vector3(0.5, 0.6, 0.5) }
       ];
 
-      cometData.forEach((c, idx) => {
+      cometData.forEach(c => {
         const headGeo = new THREE.SphereGeometry(3.8, 16, 16);
         const headMat = new THREE.MeshBasicMaterial({ color: 0x88ffff });
         const head = new THREE.Mesh(headGeo, headMat);
         head.position.copy(c.pos);
         scene.add(head);
 
-        // Cauda do cometa
         const tailPts = [c.pos.clone(), c.pos.clone().add(c.tailDir.clone().multiplyScalar(45))];
         const tailGeo = new THREE.BufferGeometry().setFromPoints(tailPts);
-        const tailMat = new THREE.LineBasicMaterial({ color: 0x44ccff, linewidth: 3, transparent: true, opacity: 0.7 });
+        const tailMat = new THREE.LineBasicMaterial({ color: 0x44ccff, linewidth: 3, transparent: true, opacity: 0.75 });
         scene.add(new THREE.Line(tailGeo, tailMat));
       });
     }
 
     // 3. IOAA Problema 3: Observador na Lua (Eclipse Solar por Terra)
     function buildSceneLunarEclipse(scene) {
-      // Superfície / Relevo Lunar em 360°
+      // Relevo e Solo Lunar
       const moonTerrainGeo = new THREE.RingGeometry(20, 390, 64);
       const moonTerrainMat = new THREE.MeshBasicMaterial({ color: 0x22252c, side: THREE.DoubleSide });
       const moonTerrain = new THREE.Mesh(moonTerrainGeo, moonTerrainMat);
@@ -598,14 +512,14 @@
         earthR * Math.cos(earthAltRad) * Math.cos(earthAzRad)
       );
 
-      // Disco Escuro da Terra
+      // Disco da Terra
       const earthGeo = new THREE.SphereGeometry(18, 32, 32);
       const earthMat = new THREE.MeshBasicMaterial({ color: 0x050810 });
       const earthMesh = new THREE.Mesh(earthGeo, earthMat);
       earthMesh.position.copy(earthPos);
       scene.add(earthMesh);
 
-      // Anel Atmosférico Vermelho Laranja da Terra (Refração de Rayleigh do pôr/nascer do Sol terrestre)
+      // Anel Atmosférico Vermelho Fogo (Refração Rayleigh)
       const ringGeo = new THREE.RingGeometry(18.2, 22.5, 64);
       const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide, transparent: true, opacity: 0.95 });
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
@@ -613,15 +527,15 @@
       ringMesh.lookAt(0, 0, 0);
       scene.add(ringMesh);
 
-      // Asteróide Juno (em Virgem)
-      const junoGeo = new THREE.SphereGeometry(2.5, 12, 12);
+      // Asteroide Juno em Virgem
+      const junoGeo = new THREE.SphereGeometry(2.8, 12, 12);
       const junoMat = new THREE.MeshBasicMaterial({ color: 0xeeeeaa });
       const junoMesh = new THREE.Mesh(junoGeo, junoMat);
       junoMesh.position.set(earthPos.x + 35, earthPos.y - 15, earthPos.z + 20);
       scene.add(junoMesh);
     }
 
-    // 4. Sistema Binário Sincronizado
+    // 4. Sistema Binário Sincronizado (Quando o segundo Sol chegar)
     function buildSceneBinarySystem(scene) {
       // Meridiano
       const linePts = [];
@@ -646,7 +560,7 @@
       plo2.position.set(38, 290, 205);
       scene.add(plo2);
 
-      // Centro de Massa (Ponto Cruzado no Meridiano)
+      // Centro de Massa
       const comGeo = new THREE.SphereGeometry(2.5, 12, 12);
       const comMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const com = new THREE.Mesh(comGeo, comMat);
@@ -690,7 +604,7 @@
       }
     }
 
-    // 5. Inicialização da Cena WebGL / VR
+    // 4. Inicialização do Motor WebGL
     function init() {
       const container = document.getElementById('container');
       
@@ -706,8 +620,37 @@
       renderer.outputEncoding = THREE.sRGBEncoding;
       container.appendChild(renderer.domElement);
 
-      // Montar a cena física correspondente à simulação selecionada
-      buildAstronomicalScene(scene, currentSim);
+      // Renderizar o céu de estrelas em 5 camadas de Pogson do Stellarium
+      renderStellariumMultiTierStars(scene, currentSim.lat, currentSim.lst, currentSim.bortle);
+
+      // Renderizar os elementos únicos de cada problema
+      if (currentSim.sceneType === 'p1_keszthely') {
+        buildSceneKeszthely(scene);
+      } else if (currentSim.sceneType === 'p2_latitude') {
+        buildSceneLatitudeChallenge(scene);
+      } else if (currentSim.sceneType === 'p3_lunar') {
+        buildSceneLunarEclipse(scene);
+      } else if (currentSim.sceneType === 'binary_system') {
+        buildSceneBinarySystem(scene);
+      } else if (currentSim.sceneType === 'custom_maker') {
+        buildSceneCustomMaker(scene, currentSim.customTarget);
+      }
+
+      // Horizonte e Solo
+      if (currentSim.sceneType !== 'p3_lunar') {
+        const horizonGeo = new THREE.RingGeometry(385, 390, 64);
+        const horizonMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, opacity: 0.35, transparent: true });
+        const horizon = new THREE.Mesh(horizonGeo, horizonMat);
+        horizon.rotation.x = Math.PI / 2;
+        scene.add(horizon);
+
+        const groundGeo = new THREE.CircleGeometry(385, 48);
+        const groundMat = new THREE.MeshBasicMaterial({ color: 0x010306, side: THREE.DoubleSide });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = Math.PI / 2;
+        ground.position.y = -0.5;
+        scene.add(ground);
+      }
 
       // Suporte a Giroscópio
       window.addEventListener('deviceorientation', handleOrientation, true);
