@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>Simulação VR 360° - Planetário IOAA</title>
+  <title>AstroVR Player 360° - Planetário IOAA</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -85,7 +85,7 @@
       text-decoration: none;
     }
     
-    /* Moldura das Lentes Cardboard (Sem nenhum botão em cima) */
+    /* Moldura das Lentes Cardboard (Sem botões em cima) */
     .eye-frame {
       position: absolute;
       top: 0;
@@ -124,7 +124,7 @@
       top: 14px;
       left: 14px;
       z-index: 1000;
-      background: rgba(10, 15, 25, 0.8);
+      background: rgba(10, 15, 25, 0.85);
       border: 1px solid rgba(0, 240, 255, 0.4);
       color: #00f0ff;
       padding: 8px 14px;
@@ -148,7 +148,7 @@
       Gire a tela para o modo paisagem (horizontal) e encaixe seu smartphone no Google Cardboard / Óculos VR para imersão astronômica completa.
     </p>
     <button class="btn" id="start-btn">ENTRAR NO VR (CARDBOARD)</button>
-    <a class="btn-back" href="index.html">← Voltar ao Catálogo de Simulações</a>
+    <a class="btn-back" href="index.html">← Voltar ao Catálogo</a>
   </div>
 
   <div id="divider-line" class="divider"></div>
@@ -163,9 +163,7 @@
 
   <div id="container"></div>
 
-  <video id="video-source" loop playsinline webkit-playsinline crossOrigin="anonymous" style="display:none">
-    <source id="video-src" src="output_videos/ioaa2019_p1_keszthely_VR360.mp4" type="video/mp4">
-  </video>
+  <video id="video-source" loop playsinline webkit-playsinline muted style="display:none"></video>
 
   <script>
     // Catálogo de Simulações
@@ -174,29 +172,33 @@
         title: 'IOAA 2019 • Problema 1: Céu de Keszthely',
         badge: '🇭🇺 IOAA 2019 • HUNGARY ROUND 1',
         desc: 'Céu à meia-noite em Keszthely (LST = 01h 00m) com γ Cassiopeiae no meridiano, 3 novas de 2ª magnitude e os 8 aglomerados de Messier.',
-        video: 'output_videos/ioaa2019_p1_keszthely_VR360.mp4'
+        video: 'output_videos/ioaa2019_p1_keszthely_VR360.mp4',
+        type: 'video'
       },
       'ioaa2019_p2': {
         title: 'IOAA • Desafio: Descubra a Latitude do Observador',
         badge: '🧭 DESAFIO DE LATITUDE (CÉU REAL)',
         desc: 'Localize o polo celeste visível e meça sua altitude angular acima do horizonte para descobrir a latitude e o hemisfério exatos deste local!',
-        video: 'output_videos/ioaa2019_p2_latitude25s_VR360.mp4'
+        video: 'output_videos/ioaa2019_p2_latitude25s_VR360.mp4',
+        type: 'video'
       },
       'ioaa2019_p3': {
         title: 'IOAA 2019 • Problema 3: Eclipse na Lua',
         badge: '🌕 IOAA 2019 • HUNGARY ROUND 3',
         desc: 'Observador em Mare Fecunditatis (0°, 50° E) vendo a Terra ocultar centralmente o Sol a 40° de altitude a Oeste, com Juno a 3 UA do Sol.',
-        video: 'output_videos/ioaa2019_p3_lunar_eclipse_VR360.mp4'
+        video: 'output_videos/ioaa2019_p3_lunar_eclipse_VR360.mp4',
+        type: 'video'
       },
       'quando_o_segundo_sol_chegar': {
         title: 'Quando o segundo Sol chegar...',
         badge: '🪐 SISTEMA BINÁRIO SINCRONIZADO',
         desc: 'Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.',
-        video: 'output_videos/quando_o_segundo_sol_chegar_VR360.mp4'
+        video: 'output_videos/quando_o_segundo_sol_chegar_VR360.mp4',
+        type: 'video'
       }
     };
 
-    // Obter parâmetro da URL
+    // Parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
     const simKey = urlParams.get('sim') || 'ioaa2019_p1';
     const isCustom = simKey === 'custom' || urlParams.has('custom_id') || urlParams.has('lat');
@@ -213,7 +215,7 @@
         title: 'Simulação Personalizada (Maker Studio)',
         badge: `🧪 MAKER STUDIO • LAT ${customLat}° • BORTLE ${customBortle}`,
         desc: `Céu customizado: Latitude ${customLat}°, LST ${customLst}h. Observe o domo celeste em 360° e resolva o desafio!`,
-        video: 'output_videos/ioaa2019_p2_latitude25s_VR360.mp4',
+        type: '3d_live',
         lat: customLat,
         lst: customLst,
         bortle: customBortle,
@@ -224,7 +226,6 @@
     document.getElementById('sim-title').textContent = currentSim.title;
     document.getElementById('sim-badge').textContent = currentSim.badge;
     document.getElementById('sim-desc').textContent = currentSim.desc;
-    document.getElementById('video-src').src = currentSim.video;
 
     let scene, camera, renderer, video, texture, mesh;
     let isVR = false;
@@ -232,7 +233,7 @@
     let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
     let screenOrientation = 0;
 
-    // Carregar configurações de calibração salvas no Hub
+    // Configurações de calibração salvas no Hub
     let eyeShiftPixels = parseInt(localStorage.getItem('cardboard_shift') || '50');
     let lensSizePercent = parseInt(localStorage.getItem('cardboard_size') || '86');
 
@@ -244,8 +245,12 @@
     const lensRight = document.getElementById('lens-right');
     const dividerLine = document.getElementById('divider-line');
     const quickBackBtn = document.getElementById('quick-back-btn');
+
     video = document.getElementById('video-source');
-    video.load();
+    if (currentSim.type === 'video') {
+      video.src = currentSim.video;
+      video.load();
+    }
 
     function applyCalibratedStyle() {
       const sizeVal = `min(${lensSizePercent * 0.5}vw, ${lensSizePercent}vh)`;
@@ -253,6 +258,87 @@
       lensLeft.style.height = sizeVal;
       lensRight.style.width = sizeVal;
       lensRight.style.height = sizeVal;
+    }
+
+    function buildLive3DSky(scene, latDeg, lstHours, bortleLevel, targetType) {
+      const bortleMagLimits = { 1: 6.5, 2: 6.0, 3: 5.5, 4: 5.0, 5: 4.5, 6: 4.0, 7: 3.5, 8: 2.8, 9: 2.0 };
+      const mLim = bortleMagLimits[bortleLevel] || 6.0;
+      const starCount = Math.round(5000 * Math.pow(mLim / 6.5, 2.5));
+
+      const geometry = new THREE.BufferGeometry();
+      const positions = [];
+      const colors = [];
+
+      const latRad = THREE.MathUtils.degToRad(latDeg);
+      const lstRad = THREE.MathUtils.degToRad(lstHours * 15);
+
+      for (let i = 0; i < starCount; i++) {
+        const dec = (Math.random() - 0.5) * Math.PI;
+        const ra = Math.random() * 2 * Math.PI;
+        const H = lstRad - ra;
+        const sinAlt = Math.sin(latRad) * Math.sin(dec) + Math.cos(latRad) * Math.cos(dec) * Math.cos(H);
+        const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+
+        if (alt > 0) {
+          const y = -Math.cos(dec) * Math.sin(H);
+          const x = Math.sin(dec) * Math.cos(latRad) - Math.cos(dec) * Math.sin(latRad) * Math.cos(H);
+          const az = Math.atan2(y, x);
+
+          const r = 400;
+          positions.push(r * Math.cos(alt) * Math.sin(az), r * Math.sin(alt), r * Math.cos(alt) * Math.cos(az));
+
+          const temp = Math.random();
+          if (temp > 0.8) colors.push(0.75, 0.85, 1.0);
+          else if (temp > 0.4) colors.push(1.0, 1.0, 0.95);
+          else if (temp > 0.15) colors.push(1.0, 0.8, 0.4);
+          else colors.push(1.0, 0.45, 0.3);
+        }
+      }
+
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+      const starMat = new THREE.PointsMaterial({
+        size: 3.5,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.98
+      });
+
+      const starsObj = new THREE.Points(geometry, starMat);
+      scene.add(starsObj);
+
+      // Horizonte
+      const horizonGeo = new THREE.RingGeometry(380, 390, 64);
+      const horizonMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, opacity: 0.3, transparent: true });
+      const horizon = new THREE.Mesh(horizonGeo, horizonMat);
+      horizon.rotation.x = Math.PI / 2;
+      scene.add(horizon);
+
+      // Alvos Especiais
+      if (targetType === 'nova') {
+        const novaGeo = new THREE.SphereGeometry(6, 16, 16);
+        const novaMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+        const nova = new THREE.Mesh(novaGeo, novaMat);
+        nova.position.set(120, 280, -200);
+        scene.add(nova);
+
+        const ringGeo = new THREE.RingGeometry(12, 14, 32);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.position.set(120, 280, -200);
+        ring.lookAt(0, 0, 0);
+        scene.add(ring);
+      } else if (targetType === 'meridian') {
+        const linePts = [];
+        for (let a = 0; a <= Math.PI; a += 0.05) {
+          linePts.push(new THREE.Vector3(0, 390 * Math.sin(a), 390 * Math.cos(a)));
+        }
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
+        const lineMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2 });
+        const meridian = new THREE.Line(lineGeo, lineMat);
+        scene.add(meridian);
+      }
     }
 
     function init() {
@@ -269,19 +355,22 @@
       renderer.autoClear = false;
       container.appendChild(renderer.domElement);
 
-      texture = new THREE.VideoTexture(video);
-      texture.generateMipmaps = false;
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      texture.format = THREE.RGBFormat;
+      if (currentSim.type === 'video') {
+        texture = new THREE.VideoTexture(video);
+        texture.generateMipmaps = false;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
 
-      const geometry = new THREE.SphereGeometry(500, 64, 48);
-      geometry.scale(-1, 1, 1);
+        const geometry = new THREE.SphereGeometry(500, 64, 48);
+        geometry.scale(-1, 1, 1);
 
-      const material = new THREE.MeshBasicMaterial({ map: texture });
-      mesh = new THREE.Mesh(geometry, material);
-      mesh.rotation.y = -Math.PI / 2;
-      scene.add(mesh);
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.y = -Math.PI / 2;
+        scene.add(mesh);
+      } else {
+        buildLive3DSky(scene, currentSim.lat, currentSim.lst, currentSim.bortle, currentSim.target);
+      }
 
       // Suporte a Giroscópio
       window.addEventListener('deviceorientation', handleOrientation, true);
@@ -343,7 +432,13 @@
             }).catch(console.error);
         }
 
-        video.play().catch(e => console.log("Erro ao tocar vídeo:", e));
+        if (currentSim.type === 'video') {
+          video.play().catch(e => {
+            console.log("Tentando reproduzir muted:", e);
+            video.muted = true;
+            video.play();
+          });
+        }
       });
 
       function animate() {
