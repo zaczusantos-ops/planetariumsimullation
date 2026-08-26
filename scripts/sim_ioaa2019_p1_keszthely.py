@@ -14,17 +14,16 @@ import os
 import sys
 
 sys.path.append(os.path.abspath("scripts"))
-import build_real_sky_blender as sky_gen
-import astro_engine
+import planetarium_core as sky_gen
 
 def build_keszthely_sky():
-    scene = sky_gen.setup_clean_scene()
+    scene = sky_gen.setup_vr_scene()
     
-    # 1. Gerar o Céu Noturno Real com todas as constelações visíveis em Keszthely
+    # 1. Gerar o Céu Noturno Real com o Planetarium Core (sem linhas artificiais)
     lat_deg = 46.77
     lst_hours = 1.0  # 01h 00m
     R = 80.0
-    sky_gen.populate_real_sky(scene, lat_deg=lat_deg, lst_hours=lst_hours, max_mag=6.0, R=R)
+    sky_gen.build_planetarium_sky(scene, lat_deg=lat_deg, lst_hours=lst_hours, max_mag=6.0, R=R, show_constellation_lines=False)
     
     # Materiais especiais
     nova_mat = sky_gen.create_emission_mat("NovaMat", (1.0, 0.25, 0.1, 1.0), strength=15.0)

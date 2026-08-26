@@ -16,17 +16,16 @@ import os
 import sys
 
 sys.path.append(os.path.abspath("scripts"))
-import build_real_sky_blender as sky_gen
-import astro_engine
+import planetarium_core as sky_gen
 
 def build_southern_sky():
-    scene = sky_gen.setup_clean_scene()
+    scene = sky_gen.setup_vr_scene()
     
     # Nova Latitude Secreta de Desafio: -33.0° S
     lat_deg = -33.0
     lst_hours = 11.53
     R = 80.0
-    sky_gen.populate_real_sky(scene, lat_deg=lat_deg, lst_hours=lst_hours, max_mag=6.0, R=R)
+    sky_gen.build_planetarium_sky(scene, lat_deg=lat_deg, lst_hours=lst_hours, max_mag=6.0, R=R, show_constellation_lines=False)
     
     comet_mat = sky_gen.create_emission_mat("CometMat", (1.0, 0.9, 0.15, 1.0), strength=12.0)
     tail_mat = sky_gen.create_emission_mat("TailMat", (1.0, 0.95, 0.3, 0.5), strength=3.0)

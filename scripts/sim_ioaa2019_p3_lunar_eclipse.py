@@ -14,19 +14,16 @@ import os
 import sys
 
 sys.path.append(os.path.abspath("scripts"))
-import build_real_sky_blender as sky_gen
-import astro_engine
+import planetarium_core as sky_gen
 
 def build_lunar_eclipse_scene():
-    scene = sky_gen.setup_clean_scene()
+    scene = sky_gen.setup_vr_scene()
     
     # Campo estelar visto da Lua (Equinócio de Outono: Sol em Virgo, RA ~ 12h, Dec ~ 0°)
-    # Na Lua a 50° E, o Sol/Terra está a 40° de altitude a Oeste
-    # Usamos o catálogo real HYG com RA centrado em 12h
     lst_hours = 14.67
     lat_deg = 0.0 # Equador lunar
     R = 80.0
-    sky_gen.populate_real_sky(scene, lat_deg=lat_deg, lst_hours=lst_hours, max_mag=6.0, R=R)
+    sky_gen.build_planetarium_sky(scene, lat_deg=lat_deg, lst_hours=lst_hours, max_mag=6.0, R=R, show_constellation_lines=False)
 
     earth_disk_mat = sky_gen.create_emission_mat("EarthDiskMat", (0.015, 0.025, 0.06, 1.0), strength=0.5)
     red_ring_mat = sky_gen.create_emission_mat("AtmosphereRingMat", (1.0, 0.22, 0.05, 1.0), strength=20.0)

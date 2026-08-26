@@ -214,36 +214,11 @@ def build_hd_vr_planetarium():
     
     label_plo2 = create_text_3d("Plo-II (m2)", (0, cm_y, cm_z), scale=1.3, color=(1.0, 0.4, 0.1, 1.0), rot=(math.radians(45), 0, 0))
     
-    # 9. Domo de Estrelas Fixas (HD)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=45, location=(0, 0, 0))
-    star_dome = bpy.context.active_object
-    star_dome.name = "StarDome_FixedStars"
-    
-    mat_stars = bpy.data.materials.new(name="Mat_Stars")
-    s_nodes = mat_stars.node_tree.nodes
-    s_links = mat_stars.node_tree.links
-    s_nodes.clear()
-    
-    s_out = s_nodes.new(type='ShaderNodeOutputMaterial')
-    s_emit = s_nodes.new(type='ShaderNodeEmission')
-    s_ramp = s_nodes.new(type='ShaderNodeValToRGB')
-    s_ramp.color_ramp.elements[0].position = 0.980
-    s_ramp.color_ramp.elements[0].color = (0, 0, 0, 1)
-    s_ramp.color_ramp.elements[1].position = 0.993
-    s_ramp.color_ramp.elements[1].color = (1, 1, 1, 1)
-    
-    s_tex = s_nodes.new(type='ShaderNodeTexVoronoi')
-    s_tex.inputs['Scale'].default_value = 60.0
-    
-    s_links.new(s_tex.outputs['Distance'], s_ramp.inputs['Fac'])
-    s_links.new(s_ramp.outputs['Color'], s_emit.inputs['Color'])
-    s_emit.inputs['Strength'].default_value = 12.0
-    s_links.new(s_emit.outputs['Emission'], s_out.inputs['Surface'])
-    
-    star_dome.data.materials.append(mat_stars)
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.flip_normals()
-    bpy.ops.object.mode_set(mode='OBJECT')
+    # 9. Domo de Estrelas Fixas Reais (Catálogo HYG)
+    import sys
+    sys.path.append(os.path.abspath("scripts"))
+    import planetarium_core
+    planetarium_core.build_planetarium_sky(scene, lat_deg=45.0, lst_hours=0.0, max_mag=6.0, R=45.0, show_constellation_lines=False)
     
     # 10. Animação Orbital
     binary_period_frames = 60
@@ -251,9 +226,7 @@ def build_hd_vr_planetarium():
         scene.frame_set(f)
         phase = 2 * math.pi * (f / binary_period_frames)
         
-        rot_sky = 2 * math.pi * (f / total_frames)
-        star_dome.rotation_euler = (0, 0, rot_sky)
-        star_dome.keyframe_insert(data_path="rotation_euler", frame=f)
+        # Rotação orbital das estrelas Plo-I e Plo-II
         
         th1 = alt_cm + (r_orbit_I / r_sky) * math.sin(phase)
         y1 = r_sky * math.cos(th1)
@@ -271,21 +244,12 @@ def build_hd_vr_planetarium():
         plo2.keyframe_insert(data_path="location", frame=f)
         label_plo2.keyframe_insert(data_path="location", frame=f)
 
-    # 11. Saída de Vídeo
+    # 11. Saída de Vídeo / Frame
     os.makedirs("output_videos", exist_ok=True)
-    raw_video_path = os.path.abspath("output_videos/raw_quando_o_segundo_sol_chegar_stereo.mp4")
     if hasattr(scene.render.image_settings, 'media_type'):
-        scene.render.image_settings.media_type = 'VIDEO'
-    scene.render.image_settings.file_format = 'FFMPEG'
-    scene.render.ffmpeg.format = 'MPEG4'
-    scene.render.ffmpeg.codec = 'H264'
-    scene.render.ffmpeg.constant_rate_factor = 'HIGH'
-    scene.render.ffmpeg.ffmpeg_preset = 'REALTIME'
-    scene.render.filepath = raw_video_path
-    
-    print(f"Renderizando {total_frames} frames em 4K Estéreo 3D VR...")
-    bpy.ops.render.render(animation=True)
-    print(f"Render 4K concluído! Salvo em: {raw_video_path}")
+        scene.render.image_settings.media_type = 'IMAGE'
+    scene.render.image_settings.file_format = 'PNG'
+    scene.render.filepath = os.path.abspath("output_videos/frames/quando_o_segundo_sol_chegar.png")
 
 if __name__ == "__main__":
     build_hd_vr_planetarium()
