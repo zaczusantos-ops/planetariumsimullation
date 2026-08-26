@@ -415,55 +415,61 @@
       });
     }
 
+       // Global list of per‑frame animation callbacks — must be declared first
+    const animationCallbacks = [];
+
     // --- CENÁRIOS INDIVIDUAIS ESPECÍFICOS DE CADA SIMULAÇÃO ---
 
     // 1. IOAA Problema 1: Keszthely (Hungria, Outubro, Lat +46.8°, LST 01h 00m)
     function buildSceneKeszthely(scene) {
-      // Arco do Meridiano Celeste Local (Norte -> Zênite -> Sul)
+      // Arco do Meridiano Celeste Local (Norte → Zênite → Sul)
       const linePts = [];
       for (let a = 0; a <= Math.PI; a += 0.03) {
         linePts.push(new THREE.Vector3(0, 390 * Math.sin(a), 390 * Math.cos(a)));
       }
       const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
       const lineMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2, transparent: true, opacity: 0.6 });
-      scene.add(new THREE.Line(lineGeo, lineMat));
+      
+      const meridianGroup = new THREE.Group();
+      meridianGroup.add(new THREE.Line(lineGeo, lineMat));
+      scene.add(meridianGroup);
+      // Rotação lenta para simular rotação da esfera celeste
+      animationCallbacks.push(() => { meridianGroup.rotation.y += 0.0004; });
 
-      // 3 Novas com anéis indicadores pulsantes (Pegasus, Cygnus, Auriga)
+      // 3 Novas com anéis indicadores (Pegasus, Cygnus, Auriga)
       const novaPositions = [
-        new THREE.Vector3(140, 270, -250), // Pegasus
-        new THREE.Vector3(-80, 310, -210), // Cygnus
-        new THREE.Vector3(260, 180, 200)   // Auriga
+        new THREE.Vector3(140, 270, -250),
+        new THREE.Vector3(-80, 310, -210),
+        new THREE.Vector3(260, 180, 200)
       ];
       novaPositions.forEach(pos => {
-        const novaGeo = new THREE.SphereGeometry(3.5, 16, 16);
-        const novaMat = new THREE.MeshBasicMaterial({ color: 0xff4422 });
-        const novaMesh = new THREE.Mesh(novaGeo, novaMat);
+        const novaMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(3.5, 16, 16),
+          new THREE.MeshBasicMaterial({ color: 0xff4422 })
+        );
         novaMesh.position.copy(pos);
         scene.add(novaMesh);
 
-        const ringGeo = new THREE.RingGeometry(8, 10, 32);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide });
-        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        const ringMesh = new THREE.Mesh(
+          new THREE.RingGeometry(8, 10, 32),
+          new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide })
+        );
         ringMesh.position.copy(pos);
         ringMesh.lookAt(0, 0, 0);
         scene.add(ringMesh);
       });
 
-      // 8 Aglomerados de Messier (M2, M13, M15, M30, M56, M71, M72, M92)
-      const messierPositions = [
-        new THREE.Vector3(80, 220, -280),
-        new THREE.Vector3(-140, 290, -180),
-        new THREE.Vector3(120, 240, -260),
-        new THREE.Vector3(90, 80, -350),
-        new THREE.Vector3(-50, 300, -210),
-        new THREE.Vector3(-20, 280, -240),
-        new THREE.Vector3(60, 140, -320),
-        new THREE.Vector3(-110, 320, -150)
-      ];
-      messierPositions.forEach(pos => {
-        const mGeo = new THREE.SphereGeometry(4.5, 12, 12);
-        const mMat = new THREE.MeshBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.55 });
-        const mMesh = new THREE.Mesh(mGeo, mMat);
+      // 8 Aglomerados de Messier
+      [
+        new THREE.Vector3(80, 220, -280), new THREE.Vector3(-140, 290, -180),
+        new THREE.Vector3(120, 240, -260), new THREE.Vector3(90, 80, -350),
+        new THREE.Vector3(-50, 300, -210), new THREE.Vector3(-20, 280, -240),
+        new THREE.Vector3(60, 140, -320),  new THREE.Vector3(-110, 320, -150)
+      ].forEach(pos => {
+        const mMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(4.5, 12, 12),
+          new THREE.MeshBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.55 })
+        );
         mMesh.position.copy(pos);
         scene.add(mMesh);
       });
@@ -471,40 +477,44 @@
 
     // 2. IOAA Problema 2: Desafio de Latitude (Lat -33.0° S)
     function buildSceneLatitudeChallenge(scene) {
-      // 3 Cometas com caudas de gás e poeira
+      const cometGroup = new THREE.Group();
+      scene.add(cometGroup);
       const cometData = [
         { pos: new THREE.Vector3(150, 210, 280), tailDir: new THREE.Vector3(0.3, 0.8, -0.5) },
-        { pos: new THREE.Vector3(-220, 260, 140), tailDir: new THREE.Vector3(-0.4, 0.7, -0.4) }, // Na Eclíptica
+        { pos: new THREE.Vector3(-220, 260, 140), tailDir: new THREE.Vector3(-0.4, 0.7, -0.4) },
         { pos: new THREE.Vector3(260, 120, -200), tailDir: new THREE.Vector3(0.5, 0.6, 0.5) }
       ];
 
       cometData.forEach(c => {
-        const headGeo = new THREE.SphereGeometry(3.8, 16, 16);
-        const headMat = new THREE.MeshBasicMaterial({ color: 0x88ffff });
-        const head = new THREE.Mesh(headGeo, headMat);
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(3.8, 16, 16),
+          new THREE.MeshBasicMaterial({ color: 0x88ffff })
+        );
         head.position.copy(c.pos);
-        scene.add(head);
+        cometGroup.add(head);
 
         const tailPts = [c.pos.clone(), c.pos.clone().add(c.tailDir.clone().multiplyScalar(45))];
-        const tailGeo = new THREE.BufferGeometry().setFromPoints(tailPts);
-        const tailMat = new THREE.LineBasicMaterial({ color: 0x44ccff, linewidth: 3, transparent: true, opacity: 0.75 });
-        scene.add(new THREE.Line(tailGeo, tailMat));
+        cometGroup.add(new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(tailPts),
+          new THREE.LineBasicMaterial({ color: 0x44ccff, linewidth: 3, transparent: true, opacity: 0.75 })
+        ));
       });
+
+      animationCallbacks.push(() => { cometGroup.rotation.y += 0.001; });
     }
 
     // 3. IOAA Problema 3: Observador na Lua (Eclipse Solar por Terra)
     function buildSceneLunarEclipse(scene) {
-      // Relevo e Solo Lunar
-      const moonTerrainGeo = new THREE.RingGeometry(20, 390, 64);
-      const moonTerrainMat = new THREE.MeshBasicMaterial({ color: 0x22252c, side: THREE.DoubleSide });
-      const moonTerrain = new THREE.Mesh(moonTerrainGeo, moonTerrainMat);
+      const moonTerrain = new THREE.Mesh(
+        new THREE.RingGeometry(20, 390, 64),
+        new THREE.MeshBasicMaterial({ color: 0x22252c, side: THREE.DoubleSide })
+      );
       moonTerrain.rotation.x = Math.PI / 2;
       moonTerrain.position.y = -1.2;
       scene.add(moonTerrain);
 
-      // Terra eclipsando o Sol a 40° de altitude a Oeste (Az ~270°)
       const earthAltRad = THREE.MathUtils.degToRad(40);
-      const earthAzRad = THREE.MathUtils.degToRad(270);
+      const earthAzRad  = THREE.MathUtils.degToRad(270);
       const earthR = 380;
       const earthPos = new THREE.Vector3(
         earthR * Math.cos(earthAltRad) * Math.sin(earthAzRad),
@@ -512,60 +522,84 @@
         earthR * Math.cos(earthAltRad) * Math.cos(earthAzRad)
       );
 
-      // Disco da Terra
-      const earthGeo = new THREE.SphereGeometry(18, 32, 32);
-      const earthMat = new THREE.MeshBasicMaterial({ color: 0x050810 });
-      const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+      const earthMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(18, 32, 32),
+        new THREE.MeshBasicMaterial({ color: 0x050810 })
+      );
       earthMesh.position.copy(earthPos);
       scene.add(earthMesh);
 
-      // Anel Atmosférico Vermelho Fogo (Refração Rayleigh)
-      const ringGeo = new THREE.RingGeometry(18.2, 22.5, 64);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide, transparent: true, opacity: 0.95 });
-      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      const ringMesh = new THREE.Mesh(
+        new THREE.RingGeometry(18.2, 22.5, 64),
+        new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide, transparent: true, opacity: 0.95 })
+      );
       ringMesh.position.copy(earthPos);
       ringMesh.lookAt(0, 0, 0);
       scene.add(ringMesh);
 
-      // Asteroide Juno em Virgem
-      const junoGeo = new THREE.SphereGeometry(2.8, 12, 12);
-      const junoMat = new THREE.MeshBasicMaterial({ color: 0xeeeeaa });
-      const junoMesh = new THREE.Mesh(junoGeo, junoMat);
+      const junoMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(2.8, 12, 12),
+        new THREE.MeshBasicMaterial({ color: 0xeeeeaa })
+      );
       junoMesh.position.set(earthPos.x + 35, earthPos.y - 15, earthPos.z + 20);
       scene.add(junoMesh);
+
+      animationCallbacks.push(() => {
+        earthMesh.rotation.y += 0.0008;
+        ringMesh.rotation.y += 0.0008;
+        junoMesh.rotation.y += 0.0008;
+      });
     }
 
     // 4. Sistema Binário Sincronizado (Quando o segundo Sol chegar)
     function buildSceneBinarySystem(scene) {
-      // Meridiano
+      // Meridiano de referência
       const linePts = [];
       for (let a = 0; a <= Math.PI; a += 0.03) {
         linePts.push(new THREE.Vector3(0, 390 * Math.sin(a), 390 * Math.cos(a)));
       }
-      const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
-      const lineMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2, transparent: true, opacity: 0.5 });
-      scene.add(new THREE.Line(lineGeo, lineMat));
+      scene.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(linePts),
+        new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2, transparent: true, opacity: 0.5 })
+      ));
 
-      // Sol Plo-I (Estrela Dourada Tipo G)
-      const plo1Geo = new THREE.SphereGeometry(10, 24, 24);
-      const plo1Mat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
-      const plo1 = new THREE.Mesh(plo1Geo, plo1Mat);
-      plo1.position.set(0, 270, 220);
+      const plo1 = new THREE.Mesh(
+        new THREE.SphereGeometry(10, 24, 24),
+        new THREE.MeshBasicMaterial({ color: 0xffaa00 })
+      );
       scene.add(plo1);
 
-      // Sol Plo-II (Estrela Azul-Ciano Tipo B)
-      const plo2Geo = new THREE.SphereGeometry(7, 24, 24);
-      const plo2Mat = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
-      const plo2 = new THREE.Mesh(plo2Geo, plo2Mat);
-      plo2.position.set(38, 290, 205);
+      const plo2 = new THREE.Mesh(
+        new THREE.SphereGeometry(7, 24, 24),
+        new THREE.MeshBasicMaterial({ color: 0x00d2ff })
+      );
       scene.add(plo2);
 
-      // Centro de Massa
-      const comGeo = new THREE.SphereGeometry(2.5, 12, 12);
-      const comMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const com = new THREE.Mesh(comGeo, comMat);
+      // Centro de Massa (fixo)
+      const com = new THREE.Mesh(
+        new THREE.SphereGeometry(2.5, 12, 12),
+        new THREE.MeshBasicMaterial({ color: 0xffffff })
+      );
       com.position.set(0, 278, 214);
       scene.add(com);
+
+      // Órbita binária animada ao redor do centro de massa
+      const binaryRadius = 40;
+      let binaryAngle = 0;
+      const cx = com.position.x, cy = com.position.y, cz = com.position.z;
+      animationCallbacks.push(() => {
+        binaryAngle += 0.0015;
+        plo1.position.set(
+          cx + binaryRadius * Math.cos(binaryAngle),
+          cy + 8,
+          cz + binaryRadius * Math.sin(binaryAngle)
+        );
+        plo2.position.set(
+          cx - binaryRadius * 0.6 * Math.cos(binaryAngle),
+          cy - 5,
+          cz - binaryRadius * 0.6 * Math.sin(binaryAngle)
+        );
+      });
     }
 
     // 5. Maker Studio Customizado
@@ -609,6 +643,8 @@
       const container = document.getElementById('container');
       
       scene = new THREE.Scene();
+      // Reset per‑frame callbacks for the new simulation
+      animationCallbacks.length = 0;
       scene.background = new THREE.Color(0x010206);
 
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -735,7 +771,12 @@
         if (hasOrientation) {
           updateCameraFromOrientation();
         } else {
+          // Clamp latitude limits
           lat = Math.max(-85, Math.min(85, lat));
+          // Auto-rotate the view slowly when the user is not interacting
+          if (!isUserInteracting) {
+            lon += 0.05; // adjust speed as needed
+          }
           const phi = THREE.MathUtils.degToRad(90 - lat);
           const theta = THREE.MathUtils.degToRad(lon);
 
@@ -745,6 +786,9 @@
           target.z = 500 * Math.sin(phi) * Math.sin(theta);
           camera.lookAt(target);
         }
+
+        // Execute per-simulation animation callbacks
+        animationCallbacks.forEach(cb => cb());
 
         renderVR();
       }
