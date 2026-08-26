@@ -983,6 +983,7 @@
 
       const positions = [];
       const colors = [];
+      const sizes = [];
       let visibleCount = 0;
 
       if (stellariumData && stellariumData.stars) {
@@ -1003,6 +1004,9 @@
               const r = 200;
               positions.push(r * Math.cos(alt) * Math.sin(az), r * Math.sin(alt), r * Math.cos(alt) * Math.cos(az));
 
+              const starSize = Math.max(2.5, Math.min(22.0, 14.0 * Math.pow(10.0, -0.16 * s.mag)));
+              sizes.push(starSize);
+
               const intensity = Math.max(0.4, 1.4 * Math.pow(10, -0.16 * s.mag));
               colors.push(s.rgb[0] * intensity, s.rgb[1] * intensity, s.rgb[2] * intensity);
             }
@@ -1014,13 +1018,48 @@
 
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      geometry.setAttribute('aColor', new THREE.Float32BufferAttribute(colors, 3));
+      geometry.setAttribute('aSize', new THREE.Float32BufferAttribute(sizes, 1));
 
-      const pMaterial = new THREE.PointsMaterial({
-        size: 3.2,
-        vertexColors: true,
+      // Textura circular de estrela suave
+      const canvasGlow = document.createElement('canvas');
+      canvasGlow.width = 64; canvasGlow.height = 64;
+      const ctxGlow = canvasGlow.getContext('2d');
+      const gradGlow = ctxGlow.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gradGlow.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
+      gradGlow.addColorStop(0.2, 'rgba(255, 255, 255, 0.9)');
+      gradGlow.addColorStop(0.45, 'rgba(255, 255, 255, 0.4)');
+      gradGlow.addColorStop(0.8, 'rgba(255, 255, 255, 0.08)');
+      gradGlow.addColorStop(1.0, 'rgba(255, 255, 255, 0.0)');
+      ctxGlow.fillStyle = gradGlow;
+      ctxGlow.fillRect(0, 0, 64, 64);
+      const starTex = new THREE.CanvasTexture(canvasGlow);
+
+      const pMaterial = new THREE.ShaderMaterial({
+        uniforms: { pointTexture: { value: starTex } },
+        vertexShader: `
+          attribute float aSize;
+          attribute vec3 aColor;
+          varying vec3 vColor;
+          void main() {
+            vColor = aColor;
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = aSize * (250.0 / -mvPosition.z);
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D pointTexture;
+          varying vec3 vColor;
+          void main() {
+            vec4 texColor = texture2D(pointTexture, gl_PointCoord);
+            if (texColor.a < 0.05) discard;
+            gl_FragColor = vec4(vColor, texColor.a);
+          }
+        `,
         transparent: true,
-        opacity: 0.95
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
       });
 
       const starPoints = new THREE.Points(geometry, pMaterial);
