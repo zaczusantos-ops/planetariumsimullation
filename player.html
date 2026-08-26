@@ -85,7 +85,7 @@
       text-decoration: none;
     }
     
-    /* Moldura das Lentes Cardboard (Sem botões em cima) */
+    /* Moldura das Lentes Cardboard */
     .eye-frame {
       position: absolute;
       top: 0;
@@ -163,8 +163,6 @@
 
   <div id="container"></div>
 
-  <video id="video-source" loop playsinline webkit-playsinline muted style="display:none"></video>
-
   <script>
     // Catálogo de Simulações
     const SIM_DATABASE = {
@@ -172,29 +170,37 @@
         title: 'IOAA 2019 • Problema 1: Céu de Keszthely',
         badge: '🇭🇺 IOAA 2019 • HUNGARY ROUND 1',
         desc: 'Céu à meia-noite em Keszthely (LST = 01h 00m) com γ Cassiopeiae no meridiano, 3 novas de 2ª magnitude e os 8 aglomerados de Messier.',
-        video: 'output_videos/ioaa2019_p1_keszthely_VR360.mp4',
-        type: 'video'
+        texture: 'output_videos/textures/ioaa2019_p1_keszthely.jpg',
+        lat: 46.77,
+        lst: 1.0,
+        bortle: 2
       },
       'ioaa2019_p2': {
         title: 'IOAA • Desafio: Descubra a Latitude do Observador',
         badge: '🧭 DESAFIO DE LATITUDE (CÉU REAL)',
         desc: 'Localize o polo celeste visível e meça sua altitude angular acima do horizonte para descobrir a latitude e o hemisfério exatos deste local!',
-        video: 'output_videos/ioaa2019_p2_latitude25s_VR360.mp4',
-        type: 'video'
+        texture: 'output_videos/textures/ioaa2019_p2_latitude25s.jpg',
+        lat: -33.0,
+        lst: 11.53,
+        bortle: 2
       },
       'ioaa2019_p3': {
         title: 'IOAA 2019 • Problema 3: Eclipse na Lua',
         badge: '🌕 IOAA 2019 • HUNGARY ROUND 3',
         desc: 'Observador em Mare Fecunditatis (0°, 50° E) vendo a Terra ocultar centralmente o Sol a 40° de altitude a Oeste, com Juno a 3 UA do Sol.',
-        video: 'output_videos/ioaa2019_p3_lunar_eclipse_VR360.mp4',
-        type: 'video'
+        texture: 'output_videos/textures/ioaa2019_p3_lunar_eclipse.jpg',
+        lat: 0.0,
+        lst: 14.67,
+        bortle: 1
       },
       'quando_o_segundo_sol_chegar': {
         title: 'Quando o segundo Sol chegar...',
         badge: '🪐 SISTEMA BINÁRIO SINCRONIZADO',
         desc: 'Planeta em rotação síncrona com sistema binário peculiar (Plo-I e Plo-II). As duas estrelas e o Centro de Massa oscilam sobre o meridiano local.',
-        video: 'output_videos/quando_o_segundo_sol_chegar_VR360.mp4',
-        type: 'video'
+        texture: 'output_videos/textures/quando_o_segundo_sol_chegar_L.jpg',
+        lat: 45.0,
+        lst: 0.0,
+        bortle: 2
       }
     };
 
@@ -215,7 +221,7 @@
         title: 'Simulação Personalizada (Maker Studio)',
         badge: `🧪 MAKER STUDIO • LAT ${customLat}° • BORTLE ${customBortle}`,
         desc: `Céu customizado: Latitude ${customLat}°, LST ${customLst}h. Observe o domo celeste em 360° e resolva o desafio!`,
-        type: '3d_live',
+        texture: null,
         lat: customLat,
         lst: customLst,
         bortle: customBortle,
@@ -227,13 +233,12 @@
     document.getElementById('sim-badge').textContent = currentSim.badge;
     document.getElementById('sim-desc').textContent = currentSim.desc;
 
-    let scene, camera, renderer, video, texture, mesh;
+    let scene, camera, renderer, mesh;
     let isVR = false;
     let hasOrientation = false;
     let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
     let screenOrientation = 0;
 
-    // Configurações de calibração salvas no Hub
     let eyeShiftPixels = parseInt(localStorage.getItem('cardboard_shift') || '50');
     let lensSizePercent = parseInt(localStorage.getItem('cardboard_size') || '86');
 
@@ -246,12 +251,6 @@
     const dividerLine = document.getElementById('divider-line');
     const quickBackBtn = document.getElementById('quick-back-btn');
 
-    video = document.getElementById('video-source');
-    if (currentSim.type === 'video') {
-      video.src = currentSim.video;
-      video.load();
-    }
-
     function applyCalibratedStyle() {
       const sizeVal = `min(${lensSizePercent * 0.5}vw, ${lensSizePercent}vh)`;
       lensLeft.style.width = sizeVal;
@@ -260,7 +259,7 @@
       lensRight.style.height = sizeVal;
     }
 
-    function buildLive3DSky(scene, latDeg, lstHours, bortleLevel, targetType) {
+    function buildLive3DSky(targetScene, latDeg, lstHours, bortleLevel, targetType) {
       const bortleMagLimits = { 1: 6.5, 2: 6.0, 3: 5.5, 4: 5.0, 5: 4.5, 6: 4.0, 7: 3.5, 8: 2.8, 9: 2.0 };
       const mLim = bortleMagLimits[bortleLevel] || 6.0;
       const starCount = Math.round(5000 * Math.pow(mLim / 6.5, 2.5));
@@ -306,14 +305,14 @@
       });
 
       const starsObj = new THREE.Points(geometry, starMat);
-      scene.add(starsObj);
+      targetScene.add(starsObj);
 
       // Horizonte
       const horizonGeo = new THREE.RingGeometry(380, 390, 64);
       const horizonMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, opacity: 0.3, transparent: true });
       const horizon = new THREE.Mesh(horizonGeo, horizonMat);
       horizon.rotation.x = Math.PI / 2;
-      scene.add(horizon);
+      targetScene.add(horizon);
 
       // Alvos Especiais
       if (targetType === 'nova') {
@@ -321,14 +320,14 @@
         const novaMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
         const nova = new THREE.Mesh(novaGeo, novaMat);
         nova.position.set(120, 280, -200);
-        scene.add(nova);
+        targetScene.add(nova);
 
         const ringGeo = new THREE.RingGeometry(12, 14, 32);
         const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide });
         const ring = new THREE.Mesh(ringGeo, ringMat);
         ring.position.set(120, 280, -200);
         ring.lookAt(0, 0, 0);
-        scene.add(ring);
+        targetScene.add(ring);
       } else if (targetType === 'meridian') {
         const linePts = [];
         for (let a = 0; a <= Math.PI; a += 0.05) {
@@ -337,7 +336,7 @@
         const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
         const lineMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2 });
         const meridian = new THREE.Line(lineGeo, lineMat);
-        scene.add(meridian);
+        targetScene.add(meridian);
       }
     }
 
@@ -355,19 +354,29 @@
       renderer.autoClear = false;
       container.appendChild(renderer.domElement);
 
-      if (currentSim.type === 'video') {
-        texture = new THREE.VideoTexture(video);
-        texture.generateMipmaps = false;
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
+      if (currentSim.texture) {
+        // Carregar textura equirretangular 360° em alta definição
+        const loader = new THREE.TextureLoader();
+        loader.load(
+          currentSim.texture,
+          function(loadedTex) {
+            loadedTex.minFilter = THREE.LinearFilter;
+            loadedTex.magFilter = THREE.LinearFilter;
 
-        const geometry = new THREE.SphereGeometry(500, 64, 48);
-        geometry.scale(-1, 1, 1);
+            const geometry = new THREE.SphereGeometry(500, 64, 48);
+            geometry.scale(-1, 1, 1);
 
-        const material = new THREE.MeshBasicMaterial({ map: texture });
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.y = -Math.PI / 2;
-        scene.add(mesh);
+            const material = new THREE.MeshBasicMaterial({ map: loadedTex });
+            mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.y = -Math.PI / 2;
+            scene.add(mesh);
+          },
+          undefined,
+          function(err) {
+            console.error("Fallback para o gerador 3D ao vivo:", err);
+            buildLive3DSky(scene, currentSim.lat || 0, currentSim.lst || 0, currentSim.bortle || 2, currentSim.target || 'none');
+          }
+        );
       } else {
         buildLive3DSky(scene, currentSim.lat, currentSim.lst, currentSim.bortle, currentSim.target);
       }
@@ -430,14 +439,6 @@
                 window.addEventListener('deviceorientation', handleOrientation, true);
               }
             }).catch(console.error);
-        }
-
-        if (currentSim.type === 'video') {
-          video.play().catch(e => {
-            console.log("Tentando reproduzir muted:", e);
-            video.muted = true;
-            video.play();
-          });
         }
       });
 
@@ -511,17 +512,16 @@
         return;
       }
 
-      // Renderização Estéreo Split-Screen com Deslocamento de Convergência (IPD Shift)
       camera.aspect = halfWidth / height;
       camera.updateProjectionMatrix();
 
-      // Olho Esquerdo
+      // Olho Esquerdo (com deslocamento de calibração IPD)
       renderer.setViewport(0 + eyeShiftPixels, 0, halfWidth, height);
       renderer.setScissor(0, 0, halfWidth, height);
       renderer.setScissorTest(true);
       renderer.render(scene, camera);
 
-      // Olho Direito
+      // Olho Direito (com deslocamento de calibração IPD)
       renderer.setViewport(halfWidth - eyeShiftPixels, 0, halfWidth, height);
       renderer.setScissor(halfWidth, 0, halfWidth, height);
       renderer.setScissorTest(true);
